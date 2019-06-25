@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.9.0">
+    
+
+    
+
+    
+
+
+
+    <meta charset="utf-8">
+    
+    
+    
+    
+    <title>AFNetWorking原理(二) AFSecurityPolicy | Xinping&#39;s Blog | 因为有了危机感，所以会义无反顾。</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    
+    <meta name="theme-color" content="#3F51B5">
+    
+    
+    <meta name="keywords" content="AFNetWorking原理,Encryption">
+    <meta name="description" content="AFNetWorking 是靠着 AFSecurityPolicy 这个类保证数据安全的，AFSecurityPolicy 其实就是验证证书是否正确的。">
+<meta name="keywords" content="AFNetWorking原理,Encryption">
+<meta property="og:type" content="article">
+<meta property="og:title" content="AFNetWorking原理(二) AFSecurityPolicy">
+<meta property="og:url" content="http://yoursite.com/2019/06/25/AFNetWorking原理二/index.html">
+<meta property="og:site_name" content="Xinping&#39;s Blog">
+<meta property="og:description" content="AFNetWorking 是靠着 AFSecurityPolicy 这个类保证数据安全的，AFSecurityPolicy 其实就是验证证书是否正确的。">
+<meta property="og:locale" content="en">
+<meta property="og:updated_time" content="2019-06-25T10:49:12.251Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="AFNetWorking原理(二) AFSecurityPolicy">
+<meta name="twitter:description" content="AFNetWorking 是靠着 AFSecurityPolicy 这个类保证数据安全的，AFSecurityPolicy 其实就是验证证书是否正确的。">
+    
+        <link rel="alternate" type="application/atom+xml" title="Xinping&#39;s Blog" href="/atom.xml">
+    
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="//unpkg.com/hexo-theme-material-indigo@latest/css/style.css">
+    <script>window.lazyScripts=[]</script>
+
+    <!-- custom head -->
+    
+
+</head>
+
+<body>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide" >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap" style="background-image:url(/img/brand.jpg)">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/avatar.jpg">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname">张新平</h5>
+          <a href="mailto:351235445@qq.com" title="351235445@qq.com" class="mail">351235445@qq.com</a>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <i class="icon icon-lg icon-home"></i>
+                主页
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/archives"  >
+                <i class="icon icon-lg icon-archives"></i>
+                Archives
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags"  >
+                <i class="icon icon-lg icon-tags"></i>
+                Tags
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories"  >
+                <i class="icon icon-lg icon-th-list"></i>
+                Categories
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/NixZhang5" target="_blank" >
+                <i class="icon icon-lg icon-github"></i>
+                Github
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">AFNetWorking原理(二) AFSecurityPolicy</div>
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="Search">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menuShare">
+            <i class="icon icon-lg icon-share-alt"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header">
+
+    <div class="container fade-scale">
+        <h1 class="title">AFNetWorking原理(二) AFSecurityPolicy</h1>
+        <h5 class="subtitle">
+            
+                <time datetime="2019-06-25T11:31:07.000Z" itemprop="datePublished" class="page-time">
+  2019-06-25
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/iOS/">iOS</a></li></ul>
+
+            
+        </h5>
+    </div>
+
+    
+
+
+</header>
+
+
+<div class="container body-wrap">
+    
+    <aside class="post-widget">
+        <nav class="post-toc-wrap post-toc-shrink" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#HTPPS"><span class="post-toc-number">1.</span> <span class="post-toc-text">HTPPS</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#HTTP和HTTPS区别"><span class="post-toc-number">2.</span> <span class="post-toc-text">HTTP和HTTPS区别</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#SSL"><span class="post-toc-number">3.</span> <span class="post-toc-text">SSL</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#SSL协议加密方式"><span class="post-toc-number">4.</span> <span class="post-toc-text">SSL协议加密方式</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#SSL证书包含的信息"><span class="post-toc-number">5.</span> <span class="post-toc-text">SSL证书包含的信息</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#握手过程"><span class="post-toc-number">6.</span> <span class="post-toc-text">握手过程</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#HTTPS的认证过程"><span class="post-toc-number">7.</span> <span class="post-toc-text">HTTPS的认证过程</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#单向认证"><span class="post-toc-number">7.1.</span> <span class="post-toc-text">单向认证</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#双向认证"><span class="post-toc-number">7.2.</span> <span class="post-toc-text">双向认证</span></a></li></ol></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#AFSecurityPolicy和认证"><span class="post-toc-number">8.</span> <span class="post-toc-text">AFSecurityPolicy和认证</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#认证过程和原理"><span class="post-toc-number">8.1.</span> <span class="post-toc-text">认证过程和原理</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#AFSecurityPolicy实例化"><span class="post-toc-number">8.2.</span> <span class="post-toc-text">AFSecurityPolicy实例化</span></a></li></ol></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#AFNetWorking-HTTPS请求示例"><span class="post-toc-number">9.</span> <span class="post-toc-text">AFNetWorking HTTPS请求示例</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#自签名证书"><span class="post-toc-number">9.1.</span> <span class="post-toc-text">自签名证书</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#SSL信任证书"><span class="post-toc-number">9.2.</span> <span class="post-toc-text">SSL信任证书</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#SSL证书AFN默认处理"><span class="post-toc-number">9.3.</span> <span class="post-toc-text">SSL证书AFN默认处理</span></a></li></ol></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#AFSecurityPolicy源码解析"><span class="post-toc-number">10.</span> <span class="post-toc-text">AFSecurityPolicy源码解析</span></a></li></ol>
+        </nav>
+    </aside>
+
+
+<article id="post-AFNetWorking原理二"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">AFNetWorking原理(二) AFSecurityPolicy</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2019-06-25 11:31:07" datetime="2019-06-25T11:31:07.000Z"  itemprop="datePublished">2019-06-25</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/iOS/">iOS</a></li></ul>
+
+
+
+            
+
+        </div>
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <p>AFNetWorking 是靠着 AFSecurityPolicy 这个类保证数据安全的，AFSecurityPolicy 其实就是验证证书是否正确的。</p>
+<a id="more"></a>
+
+<p>AFSecurityPolicy 的校验选项 AFSSLPinningMode 有三种：</p>
+<ol>
+<li>AFSSLPinningModeNone 在与服务器建立安全连接时，并不会使用应用中已有的证书（也可能本就没有）对服务器传递的信息进行校验，此为默认选项</li>
+<li>AFSSLPinningModePublicKey 使用应用中已有的公钥对服务器传递的信息进行校验</li>
+<li>AFSSLPinningModeCertificate 使用应用中已有的数字证书对服务器传递的信息进行校验</li>
+</ol>
+<h3 id="HTPPS"><a href="#HTPPS" class="headerlink" title="HTPPS"></a>HTPPS</h3><p>HTTPS（全称：Hyper Text Transfer Protocol over Secure Socket Layer），是以安全为目标的HTTP通道，简单讲是HTTP的安全版。即HTTP下加入SSL层，HTTPS的安全基础是SSL，因此加密的详细内容就需要SSL。 它是一个URI scheme（抽象标识符体系），句法类同http:体系。用于安全的HTTP数据传输。https:URL表明它使用了HTTP，但HTTPS存在不同于HTTP的默认端口及一个加密/身份验证层（在HTTP与TCP之间）。这个系统的最初研发由网景公司(Netscape)进行，并内置于其浏览器Netscape Navigator中，提供了身份验证与加密通讯方法。</p>
+<p>HTTPS连接建立 非对称加密、对称加密：<br>客户端和服务端建立一个连接，服务端返回一个证书，客户端里存有（各个受信任的证书机构）根证书，用这些根证书对<strong>服务端返回的证书</strong>进行验证，经验证如果证书（服务端返回的证书）是可信任的，就生成一个pre-master  secret，用这个证书（服务端返回的证书）的公钥加密后发送给服务端，服务端用私钥解密后得到pre-master secret，再根据某种算法生成master  secret，客户端也同样根据这种算法从pre-master secret生成master secret（非对称加密），随后双方的通信都用这个master  secret对传输数据进行加密解密（对称加密）。</p>
+<p>非对称加密： d(c(x))=x</p>
+<h3 id="HTTP和HTTPS区别"><a href="#HTTP和HTTPS区别" class="headerlink" title="HTTP和HTTPS区别"></a>HTTP和HTTPS区别</h3><p>超文本传输协议HTTP协议被用于在Web浏览器和网站服务器之间传递信息。HTTP协议以明文方式发送内容，不提供任何方式的数据加密，如果攻击者截取了Web浏览器和网站服务器之间的传输报文，就可以直接读懂其中的信息，因此HTTP协议不适合传输一些敏感信息，比如信用卡号、密码等。<br>为了解决HTTP协议的这一缺陷，需要使用另一种协议：安全套接字层超文本传输协议HTTPS。为了数据传输的安全，HTTPS在HTTP的基础上加入了SSL协议，SSL依靠证书来验证服务器的身份，并为浏览器和服务器之间的通信加密。</p>
+<p>HTTPS和HTTP的区别主要为以下四点：</p>
+<ol>
+<li>https协议需要到ca申请证书，一般免费证书很少，需要交费。</li>
+<li>http是超文本传输协议，信息是明文传输，https 则是具有安全性的ssl加密传输协议。</li>
+<li>http和https使用的是完全不同的连接方式，用的端口也不一样，前者是80，后者是443。</li>
+<li>http的连接很简单，是无状态的；HTTPS协议是由SSL+HTTP协议构建的可进行加密传输、身份认证的网络协议，比http协议安全。</li>
+</ol>
+<h3 id="SSL"><a href="#SSL" class="headerlink" title="SSL"></a>SSL</h3><p>SSL(Secure Sockets Layer安全套接层),及其继任者传输层安全(Transport Layer Security，TLS)是为网络通信提供安全及数据完整性的一种安全协议。TLS与SSL在传输层对网络连接进行加密。</p>
+<p>SSL (Secure Socket Layer)为Netscape所研发，用以保障在Internet上数据传输之安全，利用数据加密(Encryption)技术，可确保数据在网络上之传输过程中不会被截取及窃听。</p>
+<p>SSL协议位于TCP/IP协议与各种应用层协议之间，为数据通讯提供安全支持。</p>
+<p>SSL协议可分为两层：</p>
+<ol>
+<li>SSL记录协议（SSL Record Protocol）：它建立在可靠的传输协议（如TCP）之上，为高层协议提供数据封装、压缩、加密等基本功能的支持。</li>
+<li>SSL握手协议（SSL Handshake Protocol）：它建立在SSL记录协议之上，用于在实际的数据传输开始前，通讯双方进行身份认证、协商加密算法、交换加密密钥等。</li>
+</ol>
+<p>SSL协议提供的服务主要有哪些</p>
+<ul>
+<li>认证用户和服务器，确保数据发送到正确的客户机和服务器</li>
+<li>加密数据以防止数据中途被窃取</li>
+<li>维护数据的完整性，确保数据在传输过程中不被改变。</li>
+</ul>
+<p>SSL协议的工作流程</p>
+<ul>
+<li><p>服务器认证阶段：<br>客户端向服务器发送一个开始信息“Hello”以便开始一个新的会话连接；<br>服务器根据客户的信息确定是否需要生成新的主密钥，如需要则服务器在响应客户的“Hello”信息时将包含生成主密钥所需的信息；<br>客户根据收到的服务器响应信息，产生一个主密钥，并用服务器的公开密钥加密后传给服务器；<br>服务器恢复该主密钥，并返回给客户一个用主密钥认证的信息，以此让客户认证服务器。</p>
+</li>
+<li><p>用户认证阶段：<br>在此之前，服务器已经通过了客户认证，这一阶段主要完成对客户的认证。经认证的服务器发送一个提问给客户，客户则返回（数字）签名后的提问和其公开密钥，从而向服务器提供认证。</p>
+</li>
+</ul>
+<p>从SSL 协议所提供的服务及其工作流程可以看出，SSL协议运行的基础是商家对消费者信息保密的承诺，这就有利于商家而不利于消费者。在电子商务初级阶段，由于运作电子商务的企业大多是信誉较高的大公司，因此这问题还没有充分暴露出来。但随着电子商务的发展，各中小型公司也参与进来，这样在电子支付过程中的单一认证问题就越来越突出。虽然在SSL3.0中通过数字签名和数字证书可实现浏览器和Web服务器双方的身份验证，但是SSL协议仍存在一些问题，比如，只能提供交易中客户与服务器间的双方认证，在涉及多方的电子交易中，SSL协议并不能协调各方间的安全传输和信任关系。在这种情况下，Visa和MasterCard两大信用卡公组织制定了SET协议，为网上信用卡支付提供了全球性的标准。</p>
+<h3 id="SSL协议加密方式"><a href="#SSL协议加密方式" class="headerlink" title="SSL协议加密方式"></a>SSL协议加密方式</h3><p>SSL协议即用到了对称加密也用到了非对称加密(公钥加密)，在建立传输链路时，SSL首先对对称加密的密钥使用公钥进行非对称加密，链路建立好之后，SSL对传输内容使用对称加密。</p>
+<ol>
+<li><p>对称加密<br>速度高，可加密内容较大，用来加密会话过程中的消息</p>
+</li>
+<li><p>公钥加密<br>加密速度较慢，但能提供更好的身份认证技术，用来加密对称加密的密钥</p>
+</li>
+</ol>
+<h3 id="SSL证书包含的信息"><a href="#SSL证书包含的信息" class="headerlink" title="SSL证书包含的信息"></a>SSL证书包含的信息</h3><ul>
+<li><p>证书版本号，不同版本的证书格式不同</p>
+</li>
+<li><p>Serial Number　序列号，同一身份验证机构签发的证书序列号唯一</p>
+</li>
+<li><p>Algorithm Identifier 　签名算法，包括必要的参数Issuer 身份验证机构的标识信息</p>
+</li>
+<li><p>Period of Validity 　有效期</p>
+</li>
+<li><p>Subject　证书持有人的标识信息</p>
+</li>
+<li><p>Subject’s Public Key　证书持有人的公钥</p>
+</li>
+<li><p>Signature　身份验证机构对证书的签名</p>
+</li>
+<li><p>证书的格式　 认证中心所发放的证书均遵循X.509 V3 标准，其基本格式如下：</p>
+</li>
+<li><p>证书版本号（Certificate Format Version）<br>含义：用来指定证书格式采用的X.509 版本号。</p>
+</li>
+<li><p>证书序列号（Certificate Serial Number）<br>含义：用来指定证书的唯一序列号，以标识CA 发出的所有公钥证书。</p>
+</li>
+<li><p>签名（Signature）算法标识（Algorithm Identifier）<br>含义：用来指定 CA 签发证书所用的签名算法。</p>
+</li>
+<li><p>签发此证书的 CA 名称（Issuer ）<br>含义：用来指定签发证书的 CA 的X.500 唯一名称（DN，Distinguished Name）。</p>
+</li>
+<li><p>证书有效期（Validity Period）起始日期（notBefore） 终止日期（notAfter）<br>含义：用来指定证书起始日期和终止日期。</p>
+</li>
+<li><p>用户名称（Subject）<br>含义：用来指定证书用户的X.500 唯一名称（DN，Distinguished Name）。</p>
+</li>
+<li><p>用户公钥信息（Subject Public Key Information）算法（algorithm） 算法标识（Algorithm　Identifier）用户公钥（subject　Public　Key）<br>含义：用来标识公钥使用的算法，并包含公钥本身。</p>
+</li>
+<li><p>证书扩充部分（扩展域）（Extensions）<br>含义：用来指定额外信息。</p>
+</li>
+<li><p>X.509 V3 证书的扩充部分（扩展域）及实现方法如下：</p>
+</li>
+<li><p>CA 的公钥标识（Authority　Key　Identifier）</p>
+</li>
+<li><p>公钥标识（SET 未使用）（Key　Identifier）</p>
+</li>
+<li><p>签发证书者证书的签发者的甄别名（Certificate　Issuer）</p>
+</li>
+<li><p>签发证书者证书的序列号（Certificate Serial Number）</p>
+</li>
+<li><p>X.509 V3 证书的扩充部分（扩展域）及实现CA 的公钥标识（Authority　Key　Identifier）</p>
+</li>
+<li><p>公钥标识（SET 未使用）（Key　Identifier）</p>
+</li>
+<li><p>签发证书者证书的签发者的甄别名（Certificat签发证书者证书的序列号（Certificate Serial Number）<br>含义：CA 签名证书所用的密钥对的唯一标识用户的公钥标识（Subject　Key　Identifier）<br>含义：用来标识与证书中公钥相关的特定密钥进行解密。</p>
+</li>
+<li><p>证书中的公钥用途（Key　Usage）<br>含义：用来指定公钥用途。</p>
+</li>
+<li><p>用户的私钥有效期（Private　Key　Usage　Period）起始日期（Note　Before） 终止日期（Note　After）<br>含义：用来指定用户签名私钥的起始日期和终止日期。</p>
+</li>
+<li><p>CA 承认的证书政策列表（Certificate Policies）<br>含义：用来指定用户证书所适用的政策，证书政策可由对象标识符表示。</p>
+</li>
+<li><p>用户的代用名（Substitutional　Name）<br>含义：用来指定用户的代用名。</p>
+</li>
+<li><p>CA 的代用名（Issuer　Alt　Name）<br>含义：用来指定 CA 的代用名。</p>
+</li>
+<li><p>基本制约（Basic　Constraints）<br>含义：用来表明证书用户是最终用户还是CA。 在SET 系统中有一些私有扩充部分（扩展域）Hashed　Root　Key 含义：只在根证书中使用，用于证书更新时进行回溯。</p>
+</li>
+<li><p>证书类型（Certificate　Type）<br>含义：用来区别不同的实体。该项是必选的。</p>
+</li>
+<li><p>商户数据（Merchant　Data）<br>含义：包含支付网关需要的所有商户信息。</p>
+</li>
+<li><p>持卡人证书需求（Card　Cert　Required）<br>含义：显示支付网关是否支持与没有证书的持卡人进行交易。</p>
+</li>
+<li><p>SET 扩展（SETExtensions）<br>含义：列出支付网关支持的支付命令的 SET 信息扩展。</p>
+</li>
+<li><p>CRL 数据定义版本（Version）<br>含义：显示 CRL 的版本号。</p>
+</li>
+<li><p>CRL 的签发者（Issuer）<br>含义：指明签发 CRL 的CA 的甄别名。</p>
+</li>
+</ul>
+<p>CRL 发布时间（this　Update）预计下一个 CRL 更新时间（Next　Update）撤销证书信息目录（Revoked　Certificates）CRL 扩展（CRL　Extension）CA 的公钥标识（Authority　Key　Identifier）CRL 号（CRL　Number）</p>
+<p>SSL证书种类：<br>CFCA，GlobalSign，VeriSign ，Geotrust ，Thawte。</p>
+<ul>
+<li>域名型 https 证书（DVSSL）：信任等级一般，只需验证网站的真实性便可颁发证书保护网站；</li>
+<li>企业型 https 证书（OVSSL）：信任等级强，须要验证企业的身份，审核严格，安全性更高；</li>
+<li>增强型 https 证书（EVSSL）：信任等级最高，一般用于银行证券等金融机构，审核严格，安全性最高，同时可以激活绿色网址栏。</li>
+</ul>
+<h3 id="握手过程"><a href="#握手过程" class="headerlink" title="握手过程"></a>握手过程</h3><p>为了便于更好的认识和理解SSL 协议，这里着重介绍SSL 协议的握手协议。SSL 协议既用到了公钥加密技术又用到了对称加密技术，对称加密技术虽然比公钥加密技术的速度快，可是公钥加密技术提供了更好的身份认证技术。SSL 的握手协议非常有效的让客户和服务器之间完成相互之间的身份认证，其主要过程如下：</p>
+<ol>
+<li>客户端的浏览器向服务器传送客户端SSL 协议的版本号，加密算法的种类，产生的随机数，以及其他服务器和客户端之间通讯所需要的各种信息。</li>
+<li>服务器向客户端传送SSL 协议的版本号，加密算法的种类，随机数以及其他相关信息，同时服务器还将向客户端传送自己的证书。</li>
+<li>客户利用服务器传过来的信息验证服务器的合法性，服务器的合法性包括：证书是否过期，发行服务器证书的CA 是否可靠，发行者证书的公钥能否正确解开服务器证书的“发行者的数字签名”，服务器证书上的域名是否和服务器的实际域名相匹配。如果合法性验证没有通过，通讯将断开；如果合法性验证通过，将继续进行第四步。</li>
+<li>用户端随机产生一个用于后面通讯的“对称密码”，然后用服务器的公钥（服务器的公钥从步骤②中的服务器的证书中获得）对其加密，然后将加密后的“预主密码”传给服务器。</li>
+<li>如果服务器要求客户的身份认证（在握手过程中为可选），用户可以建立一个随机数然后对其进行数据签名，将这个含有签名的随机数和客户自己的证书以及加密过的“预主密码”一起传给服务器。</li>
+<li>如果服务器要求客户的身份认证，服务器必须检验客户证书和签名随机数的合法性，具体的合法性验证过程包括：客户的证书使用日期是否有效，为客户提供证书的CA 是否可靠，发行CA 的公钥能否正确解开客户证书的发行CA 的数字签名，检查客户的证书是否在证书废止列表（CRL）中。检验如果没有通过，通讯立刻中断；如果验证通过，服务器将用自己的私钥解开加密的“预主密码”，然后执行一系列步骤来产生主通讯密码（客户端也将通过同样的方法产生相同的主通讯密码）。</li>
+<li>服务器和客户端用相同的主密码即“通话密码”，一个对称密钥用于SSL 协议的安全数据通讯的加解密通讯。同时在SSL 通讯过程中还要完成数据通讯的完整性，防止数据通讯中的任何变化。</li>
+<li>客户端向服务器端发出信息，指明后面的数据通讯将使用的步骤⑦中的主密码为对称密钥，同时通知服务器客户端的握手过程结束。</li>
+<li>服务器向客户端发出信息，指明后面的数据通讯将使用的步骤⑦中的主密码为对称密钥，同时通知客户端服务器端的握手过程结束。</li>
+<li>SSL 的握手部分结束，SSL 安全通道的数据通讯开始，客户和服务器开始使用相同的对称密钥进行数据通讯，同时进行通讯完整性的检验。</li>
+</ol>
+<h3 id="HTTPS的认证过程"><a href="#HTTPS的认证过程" class="headerlink" title="HTTPS的认证过程"></a>HTTPS的认证过程</h3><h4 id="单向认证"><a href="#单向认证" class="headerlink" title="单向认证"></a>单向认证</h4><p>Https在建立Socket连接之前，需要进行握手，具体过程如下：</p>
+<ol>
+<li>客户端向服务端发送SSL协议版本号、加密算法种类、随机数等信息。</li>
+<li>服务端给客户端返回SSL协议版本号、加密算法种类、随机数等信息，同时也返回服务器端的证书，即公钥证书</li>
+<li>客户端使用服务端返回的信息验证服务器的合法性，包括：<ol>
+<li>证书是否过期</li>
+<li>发型服务器证书的CA是否可靠</li>
+<li>返回的公钥是否能正确解开返回证书中的数字签名</li>
+<li>服务器证书上的域名是否和服务器的实际域名相匹配</li>
+<li>验证通过后，将继续进行通信，否则，终止通信</li>
+</ol>
+</li>
+<li>客户端向服务端发送自己所能支持的对称加密方案，供服务器端进行选择</li>
+<li>服务器端在客户端提供的加密方案中选择加密程度最高的加密方式。</li>
+<li>服务器将选择好的加密方案通过明文方式返回给客户端</li>
+<li>客户端接收到服务端返回的加密方式后，使用该加密方式生成产生随机码，用作通信过程中对称加密的密钥，使用服务端返回的公钥进行加密，将加密后的随机码发送至服务器</li>
+<li>服务器收到客户端返回的加密信息后，使用自己的私钥进行解密，获取对称加密密钥。在接下来的会话中，服务器和客户端将会使用该密码进行对称加密，保证通信过程中信息的安全。</li>
+</ol>
+<h4 id="双向认证"><a href="#双向认证" class="headerlink" title="双向认证"></a>双向认证</h4><p>双向认证和单向认证原理基本差不多，只是除了客户端需要认证服务端以外，增加了服务端对客户端的认证，具体过程如下：</p>
+<ol>
+<li>客户端向服务端发送SSL协议版本号、加密算法种类、随机数等信息。</li>
+<li>服务端给客户端返回SSL协议版本号、加密算法种类、随机数等信息，同时也返回服务器端的证书，即公钥证书</li>
+<li>客户端使用服务端返回的信息验证服务器的合法性，包括：<ol>
+<li>证书是否过期</li>
+<li>发型服务器证书的CA是否可靠</li>
+<li>返回的公钥是否能正确解开返回证书中的数字签名</li>
+<li>服务器证书上的域名是否和服务器的实际域名相匹配</li>
+<li>验证通过后，将继续进行通信，否则，终止通信</li>
+</ol>
+</li>
+<li>服务端要求客户端发送客户端的证书，客户端会将自己的证书发送至服务端</li>
+<li>验证客户端的证书，通过验证后，会获得客户端的公钥</li>
+<li>客户端向服务端发送自己所能支持的对称加密方案，供服务器端进行选择</li>
+<li>服务器端在客户端提供的加密方案中选择加密程度最高的加密方式</li>
+<li>将加密方案通过使用之前获取到的公钥进行加密，返回给客户端</li>
+<li>客户端收到服务端返回的加密方案密文后，使用自己的私钥进行解密，获取具体加密方式，而后，产生该加密方式的随机码，用作加密过程中的密钥，使用之前从服务端证书中获取到的公钥进行加密后，发送给服务端</li>
+<li>服务端收到客户端发送的消息后，使用自己的私钥进行解密，获取对称加密的密钥，在接下来的会话中，服务器和客户端将会使用该密码进行对称加密，保证通信过程中信息的安全。</li>
+</ol>
+<h3 id="AFSecurityPolicy和认证"><a href="#AFSecurityPolicy和认证" class="headerlink" title="AFSecurityPolicy和认证"></a>AFSecurityPolicy和认证</h3><h4 id="认证过程和原理"><a href="#认证过程和原理" class="headerlink" title="认证过程和原理"></a>认证过程和原理</h4><p>AFN是靠着AFSecurityPolicy这个类保证数据安全的，调用下面方法用来验证是否信任服务器。</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[<span class="keyword">self</span>.securityPolicy evaluateServerTrust:challenge.protectionSpace.serverTrust forDomain:challenge.protectionSpace.host]</span><br></pre></td></tr></table></figure>
+
+<p>看一下AFN中的接口</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*!</span></span><br><span class="line"><span class="comment">    @typedef SecTrustRef</span></span><br><span class="line"><span class="comment">    @abstract CFType used for performing X.509 certificate trust evaluations.</span></span><br><span class="line"><span class="comment">    // 执行X.509证书信任评估，其实就是一个容器，装了服务器端需要验证的证书的基本信息、</span></span><br><span class="line"><span class="comment">    公钥等等，不仅如此，它还可以装一些评估策略，还有客户端的锚点证书，</span></span><br><span class="line"><span class="comment">    这个客户端的证书，可以用来和服务端的证书去匹配验证的</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span> <span class="built_in">CF_BRIDGED_TYPE</span>(<span class="keyword">id</span>) __SecTrust *SecTrustRef;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> Whether or not the specified server trust should be accepted, based on the security policy.</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment"> This method should be used when responding to an authentication challenge from a server.</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment"> @param serverTrust The X.509 certificate trust of the server.</span></span><br><span class="line"><span class="comment"> @param domain The domain of serverTrust. If `nil`, the domain will not be validated. // 服务器域名</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment"> @return Whether or not to trust the server.</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line">- (<span class="built_in">BOOL</span>)evaluateServerTrust:(SecTrustRef)serverTrust</span><br><span class="line">                  forDomain:(<span class="keyword">nullable</span> <span class="built_in">NSString</span> *)domain;</span><br></pre></td></tr></table></figure>
+
+<p>根据安全策略是否接受指定的服务器信任。 响应来自服务器的身份验证质询时应使用此方法。</p>
+<p>大家还记得这个代理方法吗？</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line">- (<span class="keyword">void</span>)URLSession:(<span class="built_in">NSURLSession</span> *)session</span><br><span class="line">didReceiveChallenge:(<span class="built_in">NSURLAuthenticationChallenge</span> *)challenge</span><br><span class="line"> completionHandler:(<span class="keyword">void</span> (^)(<span class="built_in">NSURLSessionAuthChallengeDisposition</span> disposition, <span class="built_in">NSURLCredential</span> *credential))completionHandler</span><br><span class="line">&#123;</span><br><span class="line">    <span class="comment">//挑战处理类型为 默认</span></span><br><span class="line">    <span class="comment">/*</span></span><br><span class="line"><span class="comment">     NSURLSessionAuthChallengePerformDefaultHandling：默认方式处理</span></span><br><span class="line"><span class="comment">     NSURLSessionAuthChallengeUseCredential：使用指定的证书</span></span><br><span class="line"><span class="comment">     NSURLSessionAuthChallengeCancelAuthenticationChallenge：取消挑战</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="built_in">NSURLSessionAuthChallengeDisposition</span> disposition = <span class="built_in">NSURLSessionAuthChallengePerformDefaultHandling</span>;</span><br><span class="line">    __block <span class="built_in">NSURLCredential</span> *credential = <span class="literal">nil</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// sessionDidReceiveAuthenticationChallenge是自定义方法，用来如何应对服务器端的认证挑战</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (<span class="keyword">self</span>.sessionDidReceiveAuthenticationChallenge) &#123;</span><br><span class="line">        disposition = <span class="keyword">self</span>.sessionDidReceiveAuthenticationChallenge(session, challenge, &amp;credential);</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">         <span class="comment">// 此处服务器要求客户端的接收认证挑战方法是NSURLAuthenticationMethodServerTrust</span></span><br><span class="line">        <span class="comment">// 也就是说服务器端需要客户端返回一个根据认证挑战的保护空间提供的信任（即challenge.protectionSpace.serverTrust）产生的挑战证书。</span></span><br><span class="line">       </span><br><span class="line">        <span class="comment">// 而这个证书就需要使用credentialForTrust:来创建一个NSURLCredential对象</span></span><br><span class="line">        <span class="keyword">if</span> ([challenge.protectionSpace.authenticationMethod isEqualToString:<span class="built_in">NSURLAuthenticationMethodServerTrust</span>]) &#123;</span><br><span class="line">            </span><br><span class="line">            <span class="comment">// 基于客户端的安全策略来决定是否信任该服务器，不信任的话，也就没必要响应挑战</span></span><br><span class="line">            <span class="keyword">if</span> ([<span class="keyword">self</span>.securityPolicy evaluateServerTrust:challenge.protectionSpace.serverTrust forDomain:challenge.protectionSpace.host]) &#123;</span><br><span class="line">                <span class="comment">// 创建挑战证书（注：挑战方式为UseCredential和PerformDefaultHandling都需要新建挑战证书）</span></span><br><span class="line">                credential = [<span class="built_in">NSURLCredential</span> credentialForTrust:challenge.protectionSpace.serverTrust];</span><br><span class="line">                <span class="comment">// 确定挑战的方式</span></span><br><span class="line">                <span class="keyword">if</span> (credential) &#123;</span><br><span class="line">                    <span class="comment">//证书挑战  设计policy,none，则跑到这里</span></span><br><span class="line">                    disposition = <span class="built_in">NSURLSessionAuthChallengeUseCredential</span>;</span><br><span class="line">                &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                    disposition = <span class="built_in">NSURLSessionAuthChallengePerformDefaultHandling</span>;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                <span class="comment">//取消挑战</span></span><br><span class="line">                disposition = <span class="built_in">NSURLSessionAuthChallengeCancelAuthenticationChallenge</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="comment">//默认挑战方式</span></span><br><span class="line">            disposition = <span class="built_in">NSURLSessionAuthChallengePerformDefaultHandling</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//完成挑战</span></span><br><span class="line">    <span class="keyword">if</span> (completionHandler) &#123;</span><br><span class="line">        completionHandler(disposition, credential);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这个方法是如何进行接受挑战的</p>
+<ul>
+<li>首先指定了HTTPS为默认的认证方式。</li>
+<li>判断有没有自定义Block:sessionDidReceiveAuthenticationChallenge，有的话，使用我们自定义Block,生成一个认证方式，并且可以给credential赋值，即我们需要接受认证的证书。然后直接调用completionHandler，去根据这两个参数，执行系统的认证。</li>
+<li>如果没有自定义Block，我们判断如果服务端的认证方法要求是NSURLAuthenticationMethodServerTrust，则只需要验证服务端证书是否安全（即https的单向认证，这是AF默认处理的认证方式，其他的认证方式，只能由我们自定义Block的实现）</li>
+<li>接着我们就执行了AFSecurityPolicy相关的上面的方法- (BOOL)evaluateServerTrust:(SecTrustRef)serverTrust forDomain:(nullable NSString *)domain，关于这个方法，AF默认的处理是，如果这行返回NO、说明AF内部认证失败，则取消HTTPS认证，即取消请求。返回YES则进入if块，用服务器返回的一个serverTrust去生成了一个认证证书。（注：这个serverTrust是服务器传过来的，里面包含了服务器的证书信息，是用来我们本地客户端去验证该证书是否合法用的，后面会更详细的去讲这个参数）然后如果有证书，则用证书认证方式，否则还是用默认的验证方式。最后调用completionHandler传递认证方式和要认证的证书，去做系统根证书验证。也可以这么理解：这里securityPolicy存在的作用就是，使得在系统底层自己去验证之前，AF可以先去验证服务端的证书。如果通不过，则直接越过系统的验证，取消HTTPS的网络请求。否则，继续去走系统根证书的验证。</li>
+</ul>
+<h4 id="AFSecurityPolicy实例化"><a href="#AFSecurityPolicy实例化" class="headerlink" title="AFSecurityPolicy实例化"></a>AFSecurityPolicy实例化</h4><p>先看一下该类的实例化</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">AFSecurityPolicy *policy = [AFSecurityPolicy defaultPolicy];</span><br><span class="line"></span><br><span class="line">+ (<span class="keyword">instancetype</span>)defaultPolicy &#123;</span><br><span class="line">    AFSecurityPolicy *securityPolicy = [[<span class="keyword">self</span> alloc] init];</span><br><span class="line">    securityPolicy.SSLPinningMode = AFSSLPinningModeNone;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> securityPolicy;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这里有一个很重要的属性就是SSLPinningMode，先看一下这个枚举</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="built_in">NS_ENUM</span>(<span class="built_in">NSUInteger</span>, AFSSLPinningMode) &#123;</span><br><span class="line">    AFSSLPinningModeNone,    <span class="comment">//不验证</span></span><br><span class="line">    AFSSLPinningModePublicKey,  <span class="comment">//只验证公钥</span></span><br><span class="line">    AFSSLPinningModeCertificate,  <span class="comment">// 验证证书</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>下面我们看一下类AFSecurityPolicy的几个属性</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> The criteria by which server trust should be evaluated against the pinned SSL certificates. Defaults to `AFSSLPinningModeNone`.</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="comment">// 验证模式 这个枚举值上面讲述过</span></span><br><span class="line"><span class="keyword">@property</span> (<span class="keyword">readonly</span>, <span class="keyword">nonatomic</span>, <span class="keyword">assign</span>) AFSSLPinningMode SSLPinningMode;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> The certificates used to evaluate server trust according to the SSL pinning mode. </span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">  By default, this property is set to any (`.cer`) certificates included in the target compiling AFNetworking. Note that if you are using AFNetworking as embedded framework, no certificates will be pinned by default. Use `certificatesInBundle` to load certificates from your target, and then create a new policy by calling `policyWithPinningMode:withPinnedCertificates`.</span></span><br><span class="line"><span class="comment"> </span></span><br><span class="line"><span class="comment"> Note that if pinning is enabled, `evaluateServerTrust:forDomain:` will return true if any pinned certificate matches.</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="comment">// 可以去匹配服务端证书验证的证书</span></span><br><span class="line"><span class="keyword">@property</span> (<span class="keyword">nonatomic</span>, <span class="keyword">strong</span>, <span class="keyword">nullable</span>) <span class="built_in">NSSet</span> &lt;<span class="built_in">NSData</span> *&gt; *pinnedCertificates;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> Whether or not to trust servers with an invalid or expired SSL certificates. Defaults to `NO`.</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="comment">// 是否支持非法的证书（例如自签名证书）</span></span><br><span class="line"><span class="keyword">@property</span> (<span class="keyword">nonatomic</span>, <span class="keyword">assign</span>) <span class="built_in">BOOL</span> allowInvalidCertificates;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> Whether or not to validate the domain name in the certificate's CN field. Defaults to `YES`.</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="comment">// 是否去验证证书域名是否匹配</span></span><br><span class="line"><span class="keyword">@property</span> (<span class="keyword">nonatomic</span>, <span class="keyword">assign</span>) <span class="built_in">BOOL</span> validatesDomainName;</span><br></pre></td></tr></table></figure>
+
+<h3 id="AFNetWorking-HTTPS请求示例"><a href="#AFNetWorking-HTTPS请求示例" class="headerlink" title="AFNetWorking HTTPS请求示例"></a>AFNetWorking HTTPS请求示例</h3><h4 id="自签名证书"><a href="#自签名证书" class="headerlink" title="自签名证书"></a>自签名证书</h4><p>我们手动指定securityPolicy认证属性。通过12306证书来实现。</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//自建证书认证</span></span><br><span class="line">- (<span class="keyword">IBAction</span>)buttion1:(<span class="keyword">id</span>)sender &#123;</span><br><span class="line">    <span class="built_in">NSURL</span> *url = [<span class="built_in">NSURL</span> URLWithString:<span class="string">@"https://kyfw.12306.cn/otn/leftTicket/init"</span>];</span><br><span class="line">    <span class="built_in">NSMutableURLRequest</span> *request = [<span class="built_in">NSMutableURLRequest</span> requestWithURL:url];</span><br><span class="line">   <span class="comment">// [request setValue:@"text/html" forHTTPHeaderField:@"Accept"];</span></span><br><span class="line">    AFURLSessionManager *manager = [[AFURLSessionManager alloc]initWithSessionConfiguration:[<span class="built_in">NSURLSessionConfiguration</span> defaultSessionConfiguration]];</span><br><span class="line">    <span class="comment">//指定安全策略</span></span><br><span class="line">    manager.securityPolicy = [<span class="keyword">self</span> ticketSecurityPolicy];</span><br><span class="line">    <span class="comment">//指定返回数据类型,默认是AFJSONResponseSerializer类型，犹豫这里不是JSON类型的返回数据，所以需要手动指定返回类型</span></span><br><span class="line">    AFHTTPResponseSerializer *responseSerializer = [AFHTTPResponseSerializer serializer];</span><br><span class="line">    responseSerializer.acceptableContentTypes = [<span class="built_in">NSSet</span> setWithObject:<span class="string">@"text/html"</span>];</span><br><span class="line">    manager.responseSerializer = responseSerializer;</span><br><span class="line">    <span class="built_in">NSURLSessionDataTask</span> *dataTask = [manager dataTaskWithRequest:request uploadProgress:<span class="literal">nil</span> downloadProgress:<span class="literal">nil</span> completionHandler:^(<span class="built_in">NSURLResponse</span> * _Nonnull response, <span class="keyword">id</span>  _Nullable responseObject, <span class="built_in">NSError</span> * _Nullable error) &#123;</span><br><span class="line">        <span class="built_in">NSLog</span>(<span class="string">@"%@-----%@"</span>,[[<span class="built_in">NSString</span> alloc] initWithData:responseObject encoding:<span class="built_in">NSUTF8StringEncoding</span>],error);</span><br><span class="line">    &#125;];</span><br><span class="line">    [dataTask resume];</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> 12306的认证证书，他的认证证书是自签名的</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment"> @return 返回指定的认证策略</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line">-(AFSecurityPolicy*)ticketSecurityPolicy &#123;</span><br><span class="line">    <span class="comment">// /先导入证书</span></span><br><span class="line">    <span class="built_in">NSString</span> *cerPath = [[<span class="built_in">NSBundle</span> mainBundle] pathForResource:<span class="string">@"12306"</span> ofType:<span class="string">@"cer"</span>];<span class="comment">//证书的路径</span></span><br><span class="line">    <span class="built_in">NSData</span> *certData = [<span class="built_in">NSData</span> dataWithContentsOfFile:cerPath];</span><br><span class="line">    <span class="built_in">NSSet</span> *set = [<span class="built_in">NSSet</span> setWithObject:certData];</span><br><span class="line"></span><br><span class="line">    AFSecurityPolicy *securityPolicy;</span><br><span class="line">    <span class="keyword">if</span> (<span class="literal">true</span>) &#123;</span><br><span class="line">        securityPolicy = [AFSecurityPolicy policyWithPinningMode:AFSSLPinningModeCertificate withPinnedCertificates:set];</span><br><span class="line">    &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">        <span class="comment">// AFSSLPinningModeCertificate 使用证书验证模式。下面这个方法会默认使用项目里面的所有证书</span></span><br><span class="line">        securityPolicy = [AFSecurityPolicy policyWithPinningMode:AFSSLPinningModeCertificate];</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// allowInvalidCertificates 是否允许无效证书（也就是自建的证书），默认为NO</span></span><br><span class="line">    <span class="comment">// 如果是需要验证自建证书，需要设置为YES</span></span><br><span class="line">    securityPolicy.allowInvalidCertificates = <span class="literal">YES</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//validatesDomainName 是否需要验证域名，默认为YES；</span></span><br><span class="line">    <span class="comment">//假如证书的域名与你请求的域名不一致，需把该项设置为NO；如设成NO的话，即服务器使用其他可信任机构颁发的证书，也可以建立连接，这个非常危险，建议打开。</span></span><br><span class="line">    <span class="comment">//置为NO，主要用于这种情况：客户端请求的是子域名，而证书上的是另外一个域名。因为SSL证书上的域名是独立的，假如证书上注册的域名是www.google.com，那么mail.google.com是无法验证通过的；当然，有钱可以注册通配符的域名*.google.com，但这个还是比较贵的。</span></span><br><span class="line">    <span class="comment">//如置为NO，建议自己添加对应域名的校验逻辑。</span></span><br><span class="line">    securityPolicy.validatesDomainName = <span class="literal">NO</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> securityPolicy;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="SSL信任证书"><a href="#SSL信任证书" class="headerlink" title="SSL信任证书"></a>SSL信任证书</h4><p>我们手动指定securityPolicy认证属性。通过百度证书来实现。</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//认证证书认证</span></span><br><span class="line">- (<span class="keyword">IBAction</span>)button2:(<span class="keyword">id</span>)sender &#123;</span><br><span class="line">    <span class="built_in">NSURL</span> *url = [<span class="built_in">NSURL</span> URLWithString:<span class="string">@"https://www.baidu.com"</span>];</span><br><span class="line">    <span class="built_in">NSMutableURLRequest</span> *request = [<span class="built_in">NSMutableURLRequest</span> requestWithURL:url];</span><br><span class="line">    <span class="comment">//[request setValue:@"text/html" forHTTPHeaderField:@"Accept"];</span></span><br><span class="line">    AFURLSessionManager *manager = [[AFURLSessionManager alloc]initWithSessionConfiguration:[<span class="built_in">NSURLSessionConfiguration</span> defaultSessionConfiguration]];</span><br><span class="line">    <span class="comment">//指定安全策略</span></span><br><span class="line">    manager.securityPolicy = [<span class="keyword">self</span> baiduSecurityPolicy];</span><br><span class="line">    <span class="comment">//指定返回数据类型,默认是AFJSONResponseSerializer类型，犹豫这里不是JSON类型的返回数据，所以需要手动指定返回类型</span></span><br><span class="line">    AFHTTPResponseSerializer *responseSerializer = [AFHTTPResponseSerializer serializer];</span><br><span class="line">    responseSerializer.acceptableContentTypes = [<span class="built_in">NSSet</span> setWithObject:<span class="string">@"text/html"</span>];</span><br><span class="line">    manager.responseSerializer = responseSerializer;</span><br><span class="line">    <span class="built_in">NSURLSessionDataTask</span> *dataTask = [manager dataTaskWithRequest:request uploadProgress:<span class="literal">nil</span> downloadProgress:<span class="literal">nil</span> completionHandler:^(<span class="built_in">NSURLResponse</span> * _Nonnull response, <span class="keyword">id</span>  _Nullable responseObject, <span class="built_in">NSError</span> * _Nullable error) &#123;</span><br><span class="line">        <span class="built_in">NSLog</span>(<span class="string">@"%@-----%@"</span>,[[<span class="built_in">NSString</span> alloc] initWithData:responseObject encoding:<span class="built_in">NSUTF8StringEncoding</span>],error);</span><br><span class="line">    &#125;];</span><br><span class="line">    [dataTask resume];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">百度的的认证证书，他的认证证书是花钱买的，也就是不是自签名的证书。这种证书，如果我们要手动指定，pinmode只能是`AFSSLPinningModeNone`</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment"> @return 返回指定的认证策略</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line">-(AFSecurityPolicy*)baiduSecurityPolicy &#123;</span><br><span class="line">    <span class="comment">// /先导入证书</span></span><br><span class="line">    <span class="built_in">NSString</span> *cerPath = [[<span class="built_in">NSBundle</span> mainBundle] pathForResource:<span class="string">@"baidu"</span> ofType:<span class="string">@"cer"</span>];<span class="comment">//证书的路径</span></span><br><span class="line">    <span class="built_in">NSData</span> *certData = [<span class="built_in">NSData</span> dataWithContentsOfFile:cerPath];</span><br><span class="line">    <span class="built_in">NSSet</span> *set = [<span class="built_in">NSSet</span> setWithObject:certData];</span><br><span class="line"></span><br><span class="line">    AFSecurityPolicy *securityPolicy;</span><br><span class="line">    <span class="keyword">if</span> (<span class="literal">true</span>) &#123;</span><br><span class="line">        <span class="comment">//这里只能用AFSSLPinningModeNone才能成功，而且我系统的证书列表里面已经有百度的证书了</span></span><br><span class="line">        securityPolicy = [AFSecurityPolicy policyWithPinningMode:AFSSLPinningModeNone withPinnedCertificates:set];</span><br><span class="line">    &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">        <span class="comment">// AFSSLPinningModeCertificate 使用证书验证模式。下面这个方法会默认使用项目里面的所有证书</span></span><br><span class="line">        securityPolicy = [AFSecurityPolicy policyWithPinningMode:AFSSLPinningModeNone];</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// allowInvalidCertificates 是否允许无效证书（也就是自建的证书），默认为NO</span></span><br><span class="line">    <span class="comment">// 如果是需要验证自建证书，需要设置为YES</span></span><br><span class="line">    securityPolicy.allowInvalidCertificates = <span class="literal">NO</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//validatesDomainName 是否需要验证域名，默认为YES；</span></span><br><span class="line">    <span class="comment">//假如证书的域名与你请求的域名不一致，需把该项设置为NO；如设成NO的话，即服务器使用其他可信任机构颁发的证书，也可以建立连接，这个非常危险，建议打开。</span></span><br><span class="line">    <span class="comment">//置为NO，主要用于这种情况：客户端请求的是子域名，而证书上的是另外一个域名。因为SSL证书上的域名是独立的，假如证书上注册的域名是www.google.com，那么mail.google.com是无法验证通过的；当然，有钱可以注册通配符的域名*.google.com，但这个还是比较贵的。</span></span><br><span class="line">    <span class="comment">//如置为NO，建议自己添加对应域名的校验逻辑。</span></span><br><span class="line">    securityPolicy.validatesDomainName = <span class="literal">YES</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> securityPolicy;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="SSL证书AFN默认处理"><a href="#SSL证书AFN默认处理" class="headerlink" title="SSL证书AFN默认处理"></a>SSL证书AFN默认处理</h4><p>这里我们不做任何额外的处理，直接使用AFN的默认证书处理机制。通过AFURLSessionManager的securityPolicy默认实现。它会和存在系统中的做对比来验证证书。</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//系统证书认证</span></span><br><span class="line">- (<span class="keyword">IBAction</span>)button3:(<span class="keyword">id</span>)sender &#123;</span><br><span class="line">    <span class="built_in">NSURL</span> *url = [<span class="built_in">NSURL</span> URLWithString:<span class="string">@"https://www.apple.com/"</span>];</span><br><span class="line">    <span class="built_in">NSMutableURLRequest</span> *request = [<span class="built_in">NSMutableURLRequest</span> requestWithURL:url];</span><br><span class="line">    AFURLSessionManager *manager = [[AFURLSessionManager alloc]initWithSessionConfiguration:[<span class="built_in">NSURLSessionConfiguration</span> defaultSessionConfiguration]];</span><br><span class="line">    <span class="comment">//指定返回数据类型,默认是AFJSONResponseSerializer类型，犹豫这里不是JSON类型的返回数据，所以需要手动指定返回类型</span></span><br><span class="line">    AFHTTPResponseSerializer *responseSerializer = [AFHTTPResponseSerializer serializer];</span><br><span class="line">    responseSerializer.acceptableContentTypes = [<span class="built_in">NSSet</span> setWithObject:<span class="string">@"text/html"</span>];</span><br><span class="line">    manager.responseSerializer = responseSerializer;</span><br><span class="line">    <span class="built_in">NSURLSessionDataTask</span> *dataTask = [manager dataTaskWithRequest:request uploadProgress:<span class="literal">nil</span> downloadProgress:<span class="literal">nil</span> completionHandler:^(<span class="built_in">NSURLResponse</span> * _Nonnull response, <span class="keyword">id</span>  _Nullable responseObject, <span class="built_in">NSError</span> * _Nullable error) &#123;</span><br><span class="line">        <span class="built_in">NSLog</span>(<span class="string">@"%@-----%@"</span>,[[<span class="built_in">NSString</span> alloc] initWithData:responseObject encoding:<span class="built_in">NSUTF8StringEncoding</span>],error);</span><br><span class="line">    &#125;];</span><br><span class="line">    [dataTask resume];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="AFSecurityPolicy源码解析"><a href="#AFSecurityPolicy源码解析" class="headerlink" title="AFSecurityPolicy源码解析"></a>AFSecurityPolicy源码解析</h3><p>AFSecurityPolicy分三种验证模式</p>
+<ol>
+<li>AFSSLPinningModeNone:<br>这个模式表示不做SSL pinning，只跟浏览器一样在系统的信任机构列表里验证服务端返回的证书。若证书是信任机构签发的就会通过，若是自己服务器生成的证书，这里是不会通过的。</li>
+<li>AFSSLPinningModeCertificate:<br>这个模式表示用证书绑定方式验证证书，需要客户端保存有服务端的证书拷贝，这里验证分两步，第一步验证证书的域名/有效期等信息，第二步是对比服务端返回的证书跟客户端返回的是否一致。这里还没弄明白第一步的验证是怎么进行的，代码上跟去系统信任机构列表里验证一样调用了SecTrustEvaluate，只是这里的列表换成了客户端保存的那些证书列表。若要验证这个，是否应该把服务端证书的颁发机构根证书也放到客户端里？</li>
+<li>AFSSLPinningModePublicKey:<br>这个模式同样是用证书绑定方式验证，客户端要有服务端的证书拷贝，只是验证时只验证证书里的公钥，不验证证书的有效期等信息。只要公钥是正确的，就能保证通信不会被窃听，因为中间人没有私钥，无法解开通过公钥加密的数据。</li>
+</ol>
+<p><strong>SecTrustRef</strong><br>这是一个需要验证的信任对象,包含待验证的证书和支持的验证方法等。</p>
+<p><strong>SecTrustResultType</strong><br>表示验证结果。其中 kSecTrustResultProceed表示serverTrust验证成功，且该验证得到了用户认可(例如在弹出的是否信任的alert框中选择always trust)。 kSecTrustResultUnspecified表示 serverTrust验证成功，此证书也被暗中信任了，但是用户并没有显示地决定信任该证书。 两者取其一就可以认为对serverTrust验证成功。</p>
+<p><strong>SecTrustEvaluate</strong><br>证书校验函数,在函数的内部递归地从叶节点证书到根证书验证。需要验证证书本身的合法性（验证签名完整性，验证证书有效期等);验证证书颁发者的合法性（查找颁发者的证书并检查其合法性，这个过程是递归的).而递归的终止条件是证书验证过程中遇到了锚点证书(锚点证书:嵌入到操作系统中的根证书,这个根证书是权威证书颁发机构颁发的自签名证书)。</p>
+<p>AFSecurityPolicy的源码细节如下：</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br><span class="line">200</span><br><span class="line">201</span><br><span class="line">202</span><br><span class="line">203</span><br><span class="line">204</span><br><span class="line">205</span><br><span class="line">206</span><br><span class="line">207</span><br><span class="line">208</span><br><span class="line">209</span><br><span class="line">210</span><br><span class="line">211</span><br><span class="line">212</span><br><span class="line">213</span><br><span class="line">214</span><br><span class="line">215</span><br><span class="line">216</span><br><span class="line">217</span><br><span class="line">218</span><br><span class="line">219</span><br><span class="line">220</span><br><span class="line">221</span><br><span class="line">222</span><br><span class="line">223</span><br><span class="line">224</span><br><span class="line">225</span><br><span class="line">226</span><br><span class="line">227</span><br><span class="line">228</span><br><span class="line">229</span><br><span class="line">230</span><br><span class="line">231</span><br><span class="line">232</span><br><span class="line">233</span><br><span class="line">234</span><br><span class="line">235</span><br><span class="line">236</span><br><span class="line">237</span><br><span class="line">238</span><br><span class="line">239</span><br><span class="line">240</span><br><span class="line">241</span><br><span class="line">242</span><br><span class="line">243</span><br><span class="line">244</span><br><span class="line">245</span><br><span class="line">246</span><br><span class="line">247</span><br><span class="line">248</span><br><span class="line">249</span><br><span class="line">250</span><br><span class="line">251</span><br><span class="line">252</span><br><span class="line">253</span><br><span class="line">254</span><br><span class="line">255</span><br><span class="line">256</span><br><span class="line">257</span><br><span class="line">258</span><br><span class="line">259</span><br><span class="line">260</span><br><span class="line">261</span><br><span class="line">262</span><br><span class="line">263</span><br><span class="line">264</span><br><span class="line">265</span><br><span class="line">266</span><br><span class="line">267</span><br><span class="line">268</span><br><span class="line">269</span><br><span class="line">270</span><br><span class="line">271</span><br><span class="line">272</span><br><span class="line">273</span><br><span class="line">274</span><br><span class="line">275</span><br><span class="line">276</span><br><span class="line">277</span><br><span class="line">278</span><br><span class="line">279</span><br><span class="line">280</span><br><span class="line">281</span><br><span class="line">282</span><br><span class="line">283</span><br><span class="line">284</span><br><span class="line">285</span><br><span class="line">286</span><br><span class="line">287</span><br><span class="line">288</span><br><span class="line">289</span><br><span class="line">290</span><br><span class="line">291</span><br><span class="line">292</span><br><span class="line">293</span><br><span class="line">294</span><br><span class="line">295</span><br><span class="line">296</span><br><span class="line">297</span><br><span class="line">298</span><br><span class="line">299</span><br><span class="line">300</span><br><span class="line">301</span><br><span class="line">302</span><br><span class="line">303</span><br><span class="line">304</span><br><span class="line">305</span><br><span class="line">306</span><br><span class="line">307</span><br><span class="line">308</span><br><span class="line">309</span><br><span class="line">310</span><br><span class="line">311</span><br><span class="line">312</span><br><span class="line">313</span><br><span class="line">314</span><br><span class="line">315</span><br><span class="line">316</span><br><span class="line">317</span><br><span class="line">318</span><br><span class="line">319</span><br><span class="line">320</span><br><span class="line">321</span><br><span class="line">322</span><br><span class="line">323</span><br><span class="line">324</span><br><span class="line">325</span><br><span class="line">326</span><br><span class="line">327</span><br><span class="line">328</span><br><span class="line">329</span><br><span class="line">330</span><br><span class="line">331</span><br><span class="line">332</span><br><span class="line">333</span><br><span class="line">334</span><br><span class="line">335</span><br><span class="line">336</span><br><span class="line">337</span><br><span class="line">338</span><br><span class="line">339</span><br><span class="line">340</span><br><span class="line">341</span><br><span class="line">342</span><br><span class="line">343</span><br><span class="line">344</span><br><span class="line">345</span><br><span class="line">346</span><br><span class="line">347</span><br><span class="line">348</span><br><span class="line">349</span><br><span class="line">350</span><br><span class="line">351</span><br><span class="line">352</span><br><span class="line">353</span><br><span class="line">354</span><br><span class="line">355</span><br><span class="line">356</span><br><span class="line">357</span><br><span class="line">358</span><br><span class="line">359</span><br><span class="line">360</span><br><span class="line">361</span><br><span class="line">362</span><br><span class="line">363</span><br><span class="line">364</span><br><span class="line">365</span><br><span class="line">366</span><br><span class="line">367</span><br><span class="line">368</span><br><span class="line">369</span><br><span class="line">370</span><br><span class="line">371</span><br><span class="line">372</span><br><span class="line">373</span><br><span class="line">374</span><br><span class="line">375</span><br><span class="line">376</span><br><span class="line">377</span><br><span class="line">378</span><br><span class="line">379</span><br><span class="line">380</span><br><span class="line">381</span><br><span class="line">382</span><br><span class="line">383</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> 证书的验证类型</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment"> - AFSSLPinningModeNone: 不使用`pinned certificates`来验证证书</span></span><br><span class="line"><span class="comment"> - AFSSLPinningModePublicKey: 使用`pinned certificates`来验证证书的公钥</span></span><br><span class="line"><span class="comment"> - AFSSLPinningModeCertificate: 使用`pinned certificates`来验证整个证书</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">typedef</span> <span class="built_in">NS_ENUM</span>(<span class="built_in">NSUInteger</span>, AFSSLPinningMode) &#123;</span><br><span class="line">    AFSSLPinningModeNone,</span><br><span class="line">    AFSSLPinningModePublicKey,</span><br><span class="line">    AFSSLPinningModeCertificate,</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> 获取指定证书的公钥</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment"> @param certificate 证书数据</span></span><br><span class="line"><span class="comment"> @return 公钥</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">static</span> <span class="keyword">id</span> AFPublicKeyForCertificate(<span class="built_in">NSData</span> *certificate) &#123;</span><br><span class="line">    <span class="keyword">id</span> allowedPublicKey = <span class="literal">nil</span>;</span><br><span class="line">    SecCertificateRef allowedCertificate;</span><br><span class="line">    SecPolicyRef policy = <span class="literal">nil</span>;</span><br><span class="line">    SecTrustRef allowedTrust = <span class="literal">nil</span>;</span><br><span class="line">    SecTrustResultType result;</span><br><span class="line">    <span class="comment">//获取证书对象</span></span><br><span class="line">    allowedCertificate = SecCertificateCreateWithData(<span class="literal">NULL</span>, (__bridge <span class="built_in">CFDataRef</span>)certificate);</span><br><span class="line">    __Require_Quiet(allowedCertificate != <span class="literal">NULL</span>, _<span class="keyword">out</span>);</span><br><span class="line">    <span class="comment">//获取X.509的认证策略</span></span><br><span class="line">    policy = SecPolicyCreateBasicX509();</span><br><span class="line">    <span class="comment">//获取allowedTrust对象的值</span></span><br><span class="line">    __Require_noErr_Quiet(SecTrustCreateWithCertificates(allowedCertificate, policy, &amp;allowedTrust), _<span class="keyword">out</span>);</span><br><span class="line">    __Require_noErr_Quiet(SecTrustEvaluate(allowedTrust, &amp;result), _<span class="keyword">out</span>);</span><br><span class="line">    <span class="comment">//根据allowedTrust获取对应的公钥</span></span><br><span class="line">    allowedPublicKey = (__bridge_transfer <span class="keyword">id</span>)SecTrustCopyPublicKey(allowedTrust);</span><br><span class="line"><span class="comment">//C++的gumpto跳转，当前面的操作出错以后，直接跳入_out执行</span></span><br><span class="line">_<span class="keyword">out</span>:</span><br><span class="line">    <span class="keyword">if</span> (allowedTrust) &#123;</span><br><span class="line">        <span class="built_in">CFRelease</span>(allowedTrust);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (policy) &#123;</span><br><span class="line">        <span class="built_in">CFRelease</span>(policy);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (allowedCertificate) &#123;</span><br><span class="line">        <span class="built_in">CFRelease</span>(allowedCertificate);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//返回公钥</span></span><br><span class="line">    <span class="keyword">return</span> allowedPublicKey;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> 在指定的证书和认证策略下，验证SecTrustRef对象是否是受信任的、合法的。</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment"> @param serverTrust SecTrustRef对象</span></span><br><span class="line"><span class="comment"> @return 结果</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">static</span> <span class="built_in">BOOL</span> AFServerTrustIsValid(SecTrustRef serverTrust) &#123;</span><br><span class="line">    <span class="built_in">BOOL</span> isValid = <span class="literal">NO</span>;</span><br><span class="line">    SecTrustResultType result;</span><br><span class="line">    <span class="comment">//获取serverTrust的认证结果，调用`SecTrustEvaluate`表示通过系统的证书来比较认证</span></span><br><span class="line">    __Require_noErr_Quiet(SecTrustEvaluate(serverTrust, &amp;result), _<span class="keyword">out</span>);</span><br><span class="line">    isValid = (result == kSecTrustResultUnspecified || result == kSecTrustResultProceed);</span><br><span class="line"></span><br><span class="line">_<span class="keyword">out</span>:</span><br><span class="line">    <span class="keyword">return</span> isValid;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> 根据`serverTrust`获取认证的证书链</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment"> @param serverTrust serverTrust对象</span></span><br><span class="line"><span class="comment"> @return 认证证书链</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">static</span> <span class="built_in">NSArray</span> * AFCertificateTrustChainForServerTrust(SecTrustRef serverTrust) &#123;</span><br><span class="line">    <span class="comment">//获取认证链的总层次</span></span><br><span class="line">    <span class="built_in">CFIndex</span> certificateCount = SecTrustGetCertificateCount(serverTrust);</span><br><span class="line">    <span class="built_in">NSMutableArray</span> *trustChain = [<span class="built_in">NSMutableArray</span> arrayWithCapacity:(<span class="built_in">NSUInteger</span>)certificateCount];</span><br><span class="line">    <span class="comment">//获取每一级认证链，把获取的证书数据存入数组中</span></span><br><span class="line">    <span class="keyword">for</span> (<span class="built_in">CFIndex</span> i = <span class="number">0</span>; i &lt; certificateCount; i++) &#123;</span><br><span class="line">        SecCertificateRef certificate = SecTrustGetCertificateAtIndex(serverTrust, i);</span><br><span class="line">        [trustChain addObject:(__bridge_transfer <span class="built_in">NSData</span> *)SecCertificateCopyData(certificate)];</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//返回证书链数组</span></span><br><span class="line">    <span class="keyword">return</span> [<span class="built_in">NSArray</span> arrayWithArray:trustChain];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> 获取serverTrust对象的认证链的公钥数组</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment"> @param serverTrust serverTrust对象</span></span><br><span class="line"><span class="comment"> @return 公钥数组</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">static</span> <span class="built_in">NSArray</span> * AFPublicKeyTrustChainForServerTrust(SecTrustRef serverTrust) &#123;</span><br><span class="line">    <span class="comment">//X.509标准的安全策略</span></span><br><span class="line">    SecPolicyRef policy = SecPolicyCreateBasicX509();</span><br><span class="line">    <span class="comment">//获取证书链的证书数量</span></span><br><span class="line">    <span class="built_in">CFIndex</span> certificateCount = SecTrustGetCertificateCount(serverTrust);</span><br><span class="line">    <span class="built_in">NSMutableArray</span> *trustChain = [<span class="built_in">NSMutableArray</span> arrayWithCapacity:(<span class="built_in">NSUInteger</span>)certificateCount];</span><br><span class="line">    <span class="keyword">for</span> (<span class="built_in">CFIndex</span> i = <span class="number">0</span>; i &lt; certificateCount; i++) &#123;</span><br><span class="line">        SecCertificateRef certificate = SecTrustGetCertificateAtIndex(serverTrust, i);</span><br><span class="line"></span><br><span class="line">        SecCertificateRef someCertificates[] = &#123;certificate&#125;;</span><br><span class="line">        <span class="built_in">CFArrayRef</span> certificates = <span class="built_in">CFArrayCreate</span>(<span class="literal">NULL</span>, (<span class="keyword">const</span> <span class="keyword">void</span> **)someCertificates, <span class="number">1</span>, <span class="literal">NULL</span>);</span><br><span class="line"></span><br><span class="line">        SecTrustRef trust;</span><br><span class="line">        <span class="comment">//通过一个证书、认证策略新建一个SecTrustRef对象</span></span><br><span class="line">        __Require_noErr_Quiet(SecTrustCreateWithCertificates(certificates, policy, &amp;trust), _<span class="keyword">out</span>);</span><br><span class="line"></span><br><span class="line">        SecTrustResultType result;</span><br><span class="line">        <span class="comment">//验证SecTrustRef对象是否成功</span></span><br><span class="line">        __Require_noErr_Quiet(SecTrustEvaluate(trust, &amp;result), _<span class="keyword">out</span>);</span><br><span class="line">        <span class="comment">//把SecTrustRef对应的公钥加入数组中</span></span><br><span class="line">        [trustChain addObject:(__bridge_transfer <span class="keyword">id</span>)SecTrustCopyPublicKey(trust)];</span><br><span class="line"></span><br><span class="line">    _<span class="keyword">out</span>:</span><br><span class="line">        <span class="keyword">if</span> (trust) &#123;</span><br><span class="line">            <span class="built_in">CFRelease</span>(trust);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (certificates) &#123;</span><br><span class="line">            <span class="built_in">CFRelease</span>(certificates);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">continue</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">CFRelease</span>(policy);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> [<span class="built_in">NSArray</span> arrayWithArray:trustChain];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">#pragma mark -</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">@interface</span> <span class="title">AFSecurityPolicy</span>()</span></span><br><span class="line"><span class="comment">//认证策略</span></span><br><span class="line"><span class="keyword">@property</span> (<span class="keyword">readwrite</span>, <span class="keyword">nonatomic</span>, <span class="keyword">assign</span>) AFSSLPinningMode SSLPinningMode;</span><br><span class="line"><span class="comment">//公钥集合</span></span><br><span class="line"><span class="keyword">@property</span> (<span class="keyword">readwrite</span>, <span class="keyword">nonatomic</span>, <span class="keyword">strong</span>) <span class="built_in">NSSet</span> *pinnedPublicKeys;</span><br><span class="line"><span class="keyword">@end</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">@implementation</span> <span class="title">AFSecurityPolicy</span></span></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> 从MainBundle中获取所有证书</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment"> @param bundle 返回包含在bundle中的证书集合。如果AFNetworking使用的是静态库，我们必须通过这个方法来加载证书。并且通过`policyWithPinningMode:withPinnedCertificates`方法来指定认证类型。</span></span><br><span class="line"><span class="comment"> @return 返回bundle里面的证书</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line">+ (<span class="built_in">NSSet</span> *)certificatesInBundle:(<span class="built_in">NSBundle</span> *)bundle &#123;</span><br><span class="line">    <span class="comment">//获取项目里的所有.cer证书</span></span><br><span class="line">    <span class="built_in">NSArray</span> *paths = [bundle pathsForResourcesOfType:<span class="string">@"cer"</span> inDirectory:<span class="string">@"."</span>];</span><br><span class="line">    <span class="built_in">NSMutableSet</span> *certificates = [<span class="built_in">NSMutableSet</span> setWithCapacity:[paths count]];</span><br><span class="line">    <span class="keyword">for</span> (<span class="built_in">NSString</span> *path <span class="keyword">in</span> paths) &#123;</span><br><span class="line">        <span class="comment">//获取证书对应的NSData，并且加入集合中</span></span><br><span class="line">        <span class="built_in">NSData</span> *certificateData = [<span class="built_in">NSData</span> dataWithContentsOfFile:path];</span><br><span class="line">        [certificates addObject:certificateData];</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//返回证书集合</span></span><br><span class="line">    <span class="keyword">return</span> [<span class="built_in">NSSet</span> setWithSet:certificates];</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> 返回当前类所在bundle所在的证书集合</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment"> @return 证书集合</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line">+ (<span class="built_in">NSSet</span> *)defaultPinnedCertificates &#123;</span><br><span class="line">    <span class="keyword">static</span> <span class="built_in">NSSet</span> *_defaultPinnedCertificates = <span class="literal">nil</span>;</span><br><span class="line">    <span class="keyword">static</span> <span class="built_in">dispatch_once_t</span> onceToken;</span><br><span class="line">    <span class="built_in">dispatch_once</span>(&amp;onceToken, ^&#123;</span><br><span class="line">        <span class="comment">//获取当前类所在bundle</span></span><br><span class="line">        <span class="built_in">NSBundle</span> *bundle = [<span class="built_in">NSBundle</span> bundleForClass:[<span class="keyword">self</span> <span class="keyword">class</span>]];</span><br><span class="line">        _defaultPinnedCertificates = [<span class="keyword">self</span> certificatesInBundle:bundle];</span><br><span class="line">    &#125;);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> _defaultPinnedCertificates;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> 返回默认的安全认证策略,在这里是验证系统的证书。这个策略不允许非法证书、验证主机名、不验证证书内容和公钥</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment"> @return 返回认证策略</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line">+ (<span class="keyword">instancetype</span>)defaultPolicy &#123;</span><br><span class="line">    AFSecurityPolicy *securityPolicy = [[<span class="keyword">self</span> alloc] init];</span><br><span class="line">    securityPolicy.SSLPinningMode = AFSSLPinningModeNone;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> securityPolicy;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> 根据指定的认证策略和默认的证书列表初始化一个`AFSecurityPolicy`对象</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment"> @param pinningMode 认证策略</span></span><br><span class="line"><span class="comment"> @return `AFSecurityPolicy`对象</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line">+ (<span class="keyword">instancetype</span>)policyWithPinningMode:(AFSSLPinningMode)pinningMode &#123;</span><br><span class="line">    <span class="keyword">return</span> [<span class="keyword">self</span> policyWithPinningMode:pinningMode withPinnedCertificates:[<span class="keyword">self</span> defaultPinnedCertificates]];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> 通过制定的认证策略`pinningMode`和证书集合`pinnedCertificates`来初始化一个`AFSecurityPolicy`对象</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment"> @param pinningMode 认证模型</span></span><br><span class="line"><span class="comment"> @param pinnedCertificates 证书集合</span></span><br><span class="line"><span class="comment"> @return AFSecurityPolicy对象</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line">+ (<span class="keyword">instancetype</span>)policyWithPinningMode:(AFSSLPinningMode)pinningMode withPinnedCertificates:(<span class="built_in">NSSet</span> *)pinnedCertificates &#123;</span><br><span class="line">    AFSecurityPolicy *securityPolicy = [[<span class="keyword">self</span> alloc] init];</span><br><span class="line">    securityPolicy.SSLPinningMode = pinningMode;</span><br><span class="line">    <span class="comment">//设置`_pinnedCertificates`和`pinnedPublicKeys`属性，分别对应证书集合和公钥集合</span></span><br><span class="line">    [securityPolicy setPinnedCertificates:pinnedCertificates];</span><br><span class="line">    <span class="comment">//返回初始化成功的`AFSecurityPolicy`</span></span><br><span class="line">    <span class="keyword">return</span> securityPolicy;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">- (<span class="keyword">instancetype</span>)init &#123;</span><br><span class="line">    <span class="keyword">self</span> = [<span class="keyword">super</span> init];</span><br><span class="line">    <span class="keyword">if</span> (!<span class="keyword">self</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">nil</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//默认是要认证主机名称</span></span><br><span class="line">    <span class="keyword">self</span>.validatesDomainName = <span class="literal">YES</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">self</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">通过指定的证书结合获取到对应的公钥集合。然后赋值给`pinnedPublicKeys`属性</span></span><br><span class="line"><span class="comment"> @param pinnedCertificates 证书集合</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line">- (<span class="keyword">void</span>)setPinnedCertificates:(<span class="built_in">NSSet</span> *)pinnedCertificates &#123;</span><br><span class="line">    _pinnedCertificates = pinnedCertificates;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (<span class="keyword">self</span>.pinnedCertificates) &#123;</span><br><span class="line">        <span class="built_in">NSMutableSet</span> *mutablePinnedPublicKeys = [<span class="built_in">NSMutableSet</span> setWithCapacity:[<span class="keyword">self</span>.pinnedCertificates count]];</span><br><span class="line">        <span class="comment">//迭代每一个证书</span></span><br><span class="line">        <span class="keyword">for</span> (<span class="built_in">NSData</span> *certificate <span class="keyword">in</span> <span class="keyword">self</span>.pinnedCertificates) &#123;</span><br><span class="line">            <span class="comment">//获取证书对应的公钥</span></span><br><span class="line">            <span class="keyword">id</span> publicKey = AFPublicKeyForCertificate(certificate);</span><br><span class="line">            <span class="keyword">if</span> (!publicKey) &#123;</span><br><span class="line">                <span class="keyword">continue</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            [mutablePinnedPublicKeys addObject:publicKey];</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">//赋值给对应的属性</span></span><br><span class="line">        <span class="keyword">self</span>.pinnedPublicKeys = [<span class="built_in">NSSet</span> setWithSet:mutablePinnedPublicKeys];</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="keyword">self</span>.pinnedPublicKeys = <span class="literal">nil</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">#pragma mark -</span></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> 为serverTrust对象指定认证策略，如果domain不为nil,则包括对主机名的认证。这个方法必须在接受到`authentication challenge`返回的时候调用。</span></span><br><span class="line"><span class="comment"> SecTrustRef可以理解为桥接证书与认证策略的对象，他关联指定的证书与认证策略</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment"> @param serverTrust 服务器的X.509标准的证书数据</span></span><br><span class="line"><span class="comment"> @param domain 认证服务器的主机名。如果是nil,则不会对主机名进行认证。</span></span><br><span class="line"><span class="comment"> @return serverTrust是否通过认证</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line">- (<span class="built_in">BOOL</span>)evaluateServerTrust:(SecTrustRef)serverTrust</span><br><span class="line">                  forDomain:(<span class="built_in">NSString</span> *)domain</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">if</span> (domain &amp;&amp; <span class="keyword">self</span>.allowInvalidCertificates &amp;&amp; <span class="keyword">self</span>.validatesDomainName &amp;&amp; (<span class="keyword">self</span>.SSLPinningMode == AFSSLPinningModeNone || [<span class="keyword">self</span>.pinnedCertificates count] == <span class="number">0</span>)) &#123;</span><br><span class="line">        <span class="comment">// https://developer.apple.com/library/mac/documentation/NetworkingInternet/Conceptual/NetworkingTopics/Articles/OverridingSSLChainValidationCorrectly.html</span></span><br><span class="line">        <span class="comment">//  According to the docs, you should only trust your provided certs for evaluation.</span></span><br><span class="line">        <span class="comment">//  Pinned certificates are added to the trust. Without pinned certificates,</span></span><br><span class="line">        <span class="comment">//  there is nothing to evaluate against.</span></span><br><span class="line">        <span class="comment">//</span></span><br><span class="line">        <span class="comment">//  From Apple Docs:</span></span><br><span class="line">        <span class="comment">//          "Do not implicitly trust self-signed certificates as anchors (kSecTrustOptionImplicitAnchors).</span></span><br><span class="line">        <span class="comment">//           Instead, add your own (self-signed) CA certificate to the list of trusted anchors."</span></span><br><span class="line">        <span class="built_in">NSLog</span>(<span class="string">@"In order to validate a domain name for self signed certificates, you MUST use pinning."</span>);</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">NO</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="built_in">NSMutableArray</span> *policies = [<span class="built_in">NSMutableArray</span> array];</span><br><span class="line">    <span class="keyword">if</span> (<span class="keyword">self</span>.validatesDomainName) &#123;</span><br><span class="line">        <span class="comment">//使用需要认证主机名的认证策略</span></span><br><span class="line">        [policies addObject:(__bridge_transfer <span class="keyword">id</span>)SecPolicyCreateSSL(<span class="literal">true</span>, (__bridge <span class="built_in">CFStringRef</span>)domain)];</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="comment">//使用默认的认证策略</span></span><br><span class="line">        [policies addObject:(__bridge_transfer <span class="keyword">id</span>)SecPolicyCreateBasicX509()];</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//给serverTrust对象指定认证策略</span></span><br><span class="line">    SecTrustSetPolicies(serverTrust, (__bridge <span class="built_in">CFArrayRef</span>)policies);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (<span class="keyword">self</span>.SSLPinningMode == AFSSLPinningModeNone) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">self</span>.allowInvalidCertificates || AFServerTrustIsValid(serverTrust);</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (!AFServerTrustIsValid(serverTrust) &amp;&amp; !<span class="keyword">self</span>.allowInvalidCertificates) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">NO</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//根据证书验证策略、数字签名认证策略、其他认证策略来处理不同情况</span></span><br><span class="line">    <span class="keyword">switch</span> (<span class="keyword">self</span>.SSLPinningMode) &#123;</span><br><span class="line">        <span class="keyword">case</span> AFSSLPinningModeNone:<span class="comment">//不验证公钥和证书</span></span><br><span class="line">        <span class="keyword">default</span>:</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">NO</span>;</span><br><span class="line">        <span class="keyword">case</span> AFSSLPinningModeCertificate: &#123;<span class="comment">//验证整个证书</span></span><br><span class="line">            <span class="built_in">NSMutableArray</span> *pinnedCertificates = [<span class="built_in">NSMutableArray</span> array];</span><br><span class="line">            <span class="comment">//根据指定证书获取，获取对应的证书对象</span></span><br><span class="line">            <span class="keyword">for</span> (<span class="built_in">NSData</span> *certificateData <span class="keyword">in</span> <span class="keyword">self</span>.pinnedCertificates) &#123;</span><br><span class="line">                [pinnedCertificates addObject:(__bridge_transfer <span class="keyword">id</span>)SecCertificateCreateWithData(<span class="literal">NULL</span>, (__bridge <span class="built_in">CFDataRef</span>)certificateData)];</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="comment">//把证书与serverTrust关联起来</span></span><br><span class="line">            SecTrustSetAnchorCertificates(serverTrust, (__bridge <span class="built_in">CFArrayRef</span>)pinnedCertificates);</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> (!AFServerTrustIsValid(serverTrust)) &#123;</span><br><span class="line">                <span class="keyword">return</span> <span class="literal">NO</span>;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="comment">// obtain the chain after being validated, which *should* contain the pinned certificate in the last position (if it's the Root CA)</span></span><br><span class="line">            <span class="comment">//获取serverTrust证书链。直到根证书。</span></span><br><span class="line">            <span class="built_in">NSArray</span> *serverCertificates = AFCertificateTrustChainForServerTrust(serverTrust);</span><br><span class="line">            <span class="comment">//如果`pinnedCertificates`包含`serverTrust`对象对应的证书链的根证书。则返回true</span></span><br><span class="line">            <span class="keyword">for</span> (<span class="built_in">NSData</span> *trustChainCertificate <span class="keyword">in</span> [serverCertificates reverseObjectEnumerator]) &#123;</span><br><span class="line">                <span class="keyword">if</span> ([<span class="keyword">self</span>.pinnedCertificates containsObject:trustChainCertificate]) &#123;</span><br><span class="line">                    <span class="keyword">return</span> <span class="literal">YES</span>;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">return</span> <span class="literal">NO</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">case</span> AFSSLPinningModePublicKey: &#123;<span class="comment">//只验证证书里面的数字签名</span></span><br><span class="line">            <span class="built_in">NSUInteger</span> trustedPublicKeyCount = <span class="number">0</span>;</span><br><span class="line">            <span class="comment">//根据serverTrust对象和SecPolicyCreateBasicX509认证策略，获取对应的公钥集合</span></span><br><span class="line">            <span class="built_in">NSArray</span> *publicKeys = AFPublicKeyTrustChainForServerTrust(serverTrust);</span><br><span class="line"></span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">id</span> trustChainPublicKey <span class="keyword">in</span> publicKeys) &#123;</span><br><span class="line">                <span class="comment">//把获取的公钥和系统获取的默认公钥比较，如果相等，则通过认证</span></span><br><span class="line">                <span class="keyword">for</span> (<span class="keyword">id</span> pinnedPublicKey <span class="keyword">in</span> <span class="keyword">self</span>.pinnedPublicKeys) &#123;</span><br><span class="line">                    <span class="keyword">if</span> (AFSecKeyIsEqualToKey((__bridge SecKeyRef)trustChainPublicKey, (__bridge SecKeyRef)pinnedPublicKey)) &#123;</span><br><span class="line">                        trustedPublicKeyCount += <span class="number">1</span>;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">return</span> trustedPublicKeyCount &gt; <span class="number">0</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="literal">NO</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">#pragma mark - NSKeyValueObserving</span></span><br><span class="line"></span><br><span class="line">+ (<span class="built_in">NSSet</span> *)keyPathsForValuesAffectingPinnedPublicKeys &#123;</span><br><span class="line">    <span class="keyword">return</span> [<span class="built_in">NSSet</span> setWithObject:<span class="string">@"pinnedCertificates"</span>];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">#pragma mark - NSSecureCoding</span></span><br><span class="line"></span><br><span class="line">+ (<span class="built_in">BOOL</span>)supportsSecureCoding &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">YES</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">- (<span class="keyword">instancetype</span>)initWithCoder:(<span class="built_in">NSCoder</span> *)decoder &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">self</span> = [<span class="keyword">self</span> init];</span><br><span class="line">    <span class="keyword">if</span> (!<span class="keyword">self</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">nil</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">self</span>.SSLPinningMode = [[decoder decodeObjectOfClass:[<span class="built_in">NSNumber</span> <span class="keyword">class</span>] forKey:<span class="built_in">NSStringFromSelector</span>(<span class="keyword">@selector</span>(SSLPinningMode))] unsignedIntegerValue];</span><br><span class="line">    <span class="keyword">self</span>.allowInvalidCertificates = [decoder decodeBoolForKey:<span class="built_in">NSStringFromSelector</span>(<span class="keyword">@selector</span>(allowInvalidCertificates))];</span><br><span class="line">    <span class="keyword">self</span>.validatesDomainName = [decoder decodeBoolForKey:<span class="built_in">NSStringFromSelector</span>(<span class="keyword">@selector</span>(validatesDomainName))];</span><br><span class="line">    <span class="keyword">self</span>.pinnedCertificates = [decoder decodeObjectOfClass:[<span class="built_in">NSArray</span> <span class="keyword">class</span>] forKey:<span class="built_in">NSStringFromSelector</span>(<span class="keyword">@selector</span>(pinnedCertificates))];</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">self</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">- (<span class="keyword">void</span>)encodeWithCoder:(<span class="built_in">NSCoder</span> *)coder &#123;</span><br><span class="line">    [coder encodeObject:[<span class="built_in">NSNumber</span> numberWithUnsignedInteger:<span class="keyword">self</span>.SSLPinningMode] forKey:<span class="built_in">NSStringFromSelector</span>(<span class="keyword">@selector</span>(SSLPinningMode))];</span><br><span class="line">    [coder encodeBool:<span class="keyword">self</span>.allowInvalidCertificates forKey:<span class="built_in">NSStringFromSelector</span>(<span class="keyword">@selector</span>(allowInvalidCertificates))];</span><br><span class="line">    [coder encodeBool:<span class="keyword">self</span>.validatesDomainName forKey:<span class="built_in">NSStringFromSelector</span>(<span class="keyword">@selector</span>(validatesDomainName))];</span><br><span class="line">    [coder encodeObject:<span class="keyword">self</span>.pinnedCertificates forKey:<span class="built_in">NSStringFromSelector</span>(<span class="keyword">@selector</span>(pinnedCertificates))];</span><br><span class="line">&#125;</span><br><span class="line"><span class="meta">#pragma mark - NSCopying</span></span><br><span class="line">- (<span class="keyword">instancetype</span>)copyWithZone:(<span class="built_in">NSZone</span> *)zone &#123;</span><br><span class="line">    AFSecurityPolicy *securityPolicy = [[[<span class="keyword">self</span> <span class="keyword">class</span>] allocWithZone:zone] init];</span><br><span class="line">    securityPolicy.SSLPinningMode = <span class="keyword">self</span>.SSLPinningMode;</span><br><span class="line">    securityPolicy.allowInvalidCertificates = <span class="keyword">self</span>.allowInvalidCertificates;</span><br><span class="line">    securityPolicy.validatesDomainName = <span class="keyword">self</span>.validatesDomainName;</span><br><span class="line">    securityPolicy.pinnedCertificates = [<span class="keyword">self</span>.pinnedCertificates copyWithZone:zone];</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> securityPolicy;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">@end</span></span><br></pre></td></tr></table></figure>
+        </div>
+
+        <blockquote class="post-copyright">
+    
+    <div class="content">
+        
+<span class="post-time">
+    Last updated: <time datetime="2019-06-25T10:49:12.251Z" itemprop="dateUpdated">2019-06-25 10:49:12</time>
+</span><br>
+
+
+        
+        这里可以写作者留言，标签和 hexo 中所有变量及辅助函数等均可调用，示例：<a href="/2019/06/25/AFNetWorking原理二/" target="_blank" rel="external">http://yoursite.com/2019/06/25/AFNetWorking原理二/</a>
+        
+    </div>
+    
+    <footer>
+        <a href="http://yoursite.com">
+            <img src="/img/avatar.jpg" alt="张新平">
+            张新平
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/AFNetWorking原理/">AFNetWorking原理</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Encryption/">Encryption</a></li></ul>
+
+
+            
+<div class="page-share-wrap">
+    
+
+<div class="page-share" id="pageShare">
+    <ul class="reset share-icons">
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=http://yoursite.com/2019/06/25/AFNetWorking原理二/&title=《AFNetWorking原理(二) AFSecurityPolicy》 — Xinping's Blog&pic=http://yoursite.com/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=http://yoursite.com/2019/06/25/AFNetWorking原理二/&title=《AFNetWorking原理(二) AFSecurityPolicy》 — Xinping's Blog&source=AFNetWorking 是靠着 AFSecurityPolicy 这个类保证数据安全的，AFSecurityPolicy 其实就是验证证书是否正确的。" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=http://yoursite.com/2019/06/25/AFNetWorking原理二/" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《AFNetWorking原理(二) AFSecurityPolicy》 — Xinping's Blog&url=http://yoursite.com/2019/06/25/AFNetWorking原理二/&via=http://yoursite.com" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=http://yoursite.com/2019/06/25/AFNetWorking原理二/" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+    </ul>
+ </div>
+
+
+
+    <a href="javascript:;" id="shareFab" class="page-share-fab waves-effect waves-circle">
+        <i class="icon icon-share-alt icon-lg"></i>
+    </a>
+</div>
+
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between flex-row-reverse">
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/2019/06/21/AFNetWorking原理/" id="post-next" class="post-nav-link">
+        <div class="tips">Next <i class="icon icon-angle-right icon-lg icon-pl"></i></div>
+        <h4 class="title">AFNetWorking原理(一) AFURLSessionManager解读</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        
+
+        <p>
+            
+                <span><a href="/atom.xml" target="_blank" class="rss" title="rss"><i class="icon icon-lg icon-rss"></i></a></span>
+            
+            <span>This blog is licensed under a <a rel="license" href="https://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p><span>张新平 &copy; 2015 - 2019</span>
+            <span>
+                
+                Power by <a href="http://hexo.io/" target="_blank">Hexo</a> Theme <a href="https://github.com/yscoder/hexo-theme-indigo" target="_blank">indigo</a>
+            </span>
+        </p>
+    </div>
+</footer>
+
+    </main>
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+
+<div class="global-share" id="globalShare">
+    <ul class="reset share-icons">
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=http://yoursite.com/2019/06/25/AFNetWorking原理二/&title=《AFNetWorking原理(二) AFSecurityPolicy》 — Xinping's Blog&pic=http://yoursite.com/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=http://yoursite.com/2019/06/25/AFNetWorking原理二/&title=《AFNetWorking原理(二) AFSecurityPolicy》 — Xinping's Blog&source=AFNetWorking 是靠着 AFSecurityPolicy 这个类保证数据安全的，AFSecurityPolicy 其实就是验证证书是否正确的。" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=http://yoursite.com/2019/06/25/AFNetWorking原理二/" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《AFNetWorking原理(二) AFSecurityPolicy》 — Xinping's Blog&url=http://yoursite.com/2019/06/25/AFNetWorking原理二/&via=http://yoursite.com" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=http://yoursite.com/2019/06/25/AFNetWorking原理二/" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+    </ul>
+ </div>
+
+
+<div class="page-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMYAAADGCAAAAACs8KCBAAACGklEQVR42u3aUY7CMAwFQO5/afYAbMOzXZBIJl+rbmkyIFl27ccjXs+L9XrP6/3Jf9fXb1sYGBg/y3guV75BfvT185NP/XMSDAyMAxhXx8qD6eTQ673WZ8PAwMCo3tO7MtkXAwMDI7lnnTiuD5oEdwwMDIy8iO0VvXkx/KVaHAMD4wcZ+Vv37//9kf4GBgbGTzGexZWnhvkRn+OFgYGxNyMPcHmql6duk4CLgYFxDiN/EZYH4l4ZnOyOgYFxMiP5cK/ROB8ai86AgYFxGGNSxE5Sw9GwBQYGxtaM3qux3sBEciVPCi9/EwwMjE0Z+eBX784c0ANjYGDszcgDaB5ke8+ZIDEwMPZm3PDhYlOhWr7mYAwMjF0ZeWNgUqwmoxvVsvbN74CBgbEpI1/zsYz8i4hexmFgYBzAqBaovdQwb0KUGxUYGBhbM5KOQW+QK/kKJgMZGBgY5zB6Sds6+FZHxPJ08PJLwcDA2JqRp1/zMJoXq72yFgMD4xzGJ1qM1eL2tgwXAwNjU0Zvy14R29sdAwPjZEby6r83RpYH4mRdsjEwMDZlTMYsJpi88Rk9HwMDY2tGNcwlReldI1/lYQsMDIytGXmQrSInzcvycAYGBsYBjELVW9zs3iTv8k4MDAyM5cZ5Mtfb/THxYWBgHMyobpY3NfNWxJuZEQwMjO0YeTMgCbvV485hGBgYezPuDZd3HXeSVmJgYGzE+AP/I0HPCrdXQQAAAABJRU5ErkJggg==" alt="微信分享二维码">
+</div>
+
+
+
+
+    <script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>
+<script>
+var BLOG = { ROOT: '/', SHARE: true, REWARD: false };
+
+
+</script>
+
+<script src="//unpkg.com/hexo-theme-material-indigo@latest/js/main.min.js"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script src="//unpkg.com/hexo-theme-material-indigo@latest/js/search.min.js" async></script>
+
+
+
+
+
+
+
+
+<script>
+(function() {
+    var OriginTitile = document.title, titleTime;
+    document.addEventListener('visibilitychange', function() {
+        if (document.hidden) {
+            document.title = '死鬼去哪里了！';
+            clearTimeout(titleTime);
+        } else {
+            document.title = '欢迎回来！';
+            titleTime = setTimeout(function() {
+                document.title = OriginTitile;
+            },2000);
+        }
+    });
+})();
+</script>
+
+
+
+</body>
+</html>
