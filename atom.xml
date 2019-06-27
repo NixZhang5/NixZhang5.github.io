@@ -5,9 +5,9 @@
   <subtitle>因为有了危机感，所以才会义无反顾。</subtitle>
   <link href="/atom.xml" rel="self"/>
   
-  <link href="http://yoursite.com/"/>
+  <link href="https://nixzhang5.github.io/"/>
   <updated>2019-06-27T02:16:48.499Z</updated>
-  <id>http://yoursite.com/</id>
+  <id>https://nixzhang5.github.io/</id>
   
   <author>
     <name>张新平</name>
@@ -18,12 +18,12 @@
   
   <entry>
     <title>App签名原理</title>
-    <link href="http://yoursite.com/2019/06/26/App%E7%AD%BE%E5%90%8D%E5%8E%9F%E7%90%86/"/>
-    <id>http://yoursite.com/2019/06/26/App签名原理/</id>
+    <link href="https://nixzhang5.github.io/App%E7%AD%BE%E5%90%8D%E5%8E%9F%E7%90%86/"/>
+    <id>https://nixzhang5.github.io/App签名原理/</id>
     <published>2019-06-26T03:29:11.000Z</published>
     <updated>2019-06-27T02:16:48.499Z</updated>
     
-    <content type="html"><![CDATA[<p>App签名是为了保证每个App都是经过苹果公司官方认证的。iPhone和系统都是苹果公司生产的，所以苹果公司可以在手机上内置公钥，App Store上内置私钥。</p><a id="more"></a><p>苹果签名需求：</p><ul><li>为了保证系统的安全性，所有iPhone上安装的应用必须是经过苹果授权的</li><li>安装包不需要上传到App Store也能被安装 （开发调试 企业灰度）</li><li>防止证书权限滥用：设备限制、指定APP、iCloud/PUSH/后台运行等附加权限控制</li></ul><h3 id="下载App签名"><a href="#下载App签名" class="headerlink" title="下载App签名"></a>下载App签名</h3><p>签名原理：</p><ol><li>App上传到App Store时，苹果公司拿到App的HASH(MD5,SHA等)值，然后用私钥进行加密(签名)，这时候只有手机上的公钥才可以解密；</li><li>手机下载应用安装App时，先用公钥解密(验证签名)，拿到HASH值，然后将此HASH值，与要安装的App的HASH值进行校验，如果App有被修改过，则校验失败。这样就可以有效的保证每个App都是经过苹果公司官方认证的。</li></ol><h3 id="双层签名"><a href="#双层签名" class="headerlink" title="双层签名"></a>双层签名</h3><p>真机调试，企业包上面的签名方式就不适合了。这时候需要双层签名：</p><ol><li>在Mac系统中生成一对非对称加密算法的公私钥M（keychain 里的 <code>从证书颁发机构请求证书</code>，保存的CertificateSigningRequest就包含公钥M，私钥保存在本地）。</li><li>苹果自己有固定的一对公私钥：私钥A在苹果后台，公钥A在每个iOS系统的手机中。</li><li>申请证书，把CertificateSigningRequest.certSigningRequest文件（包含公钥M，以及一些开发者信息）发送给苹果后台，用苹果后台的私钥A对公钥M签名，得到一份包含公钥M以及其签名结果的数据就是证书。<ul><li>生成的证书下载下来，keychain会把这两个证书关联起来，因为公私钥是对应的。这个私钥只有这台电脑有，团队开发需要把这个私钥导出.p12给其他Mac.</li></ul></li><li>配置 AppID / 权限 / 设备等，最后下载 Provisioning Profile 文件（包含设备IDs,AppID,Entitlements(权力文件包含是否可调试，推送，后台运行等信息)）。</li><li>XCode 会通过第3步下载回来的证书（存着公钥），在本地找到对应的私钥（第1步生成的），用本地私钥去签名 App，并把 Provisioning Profile 文件命名为 embedded.mobileprovision 一起打包进去。<ul><li>打包过程用私钥M对App的HASH值进行加密(签名)，这时的APP内部实际包含了APP的签名(私钥M加密App的HASH值)、第3步生成的证书文件(包含公钥M和公钥M的HASH值)、Provision Profile(描述文件)，App可执行文件以及其他信息</li></ul></li><li>解密：<ol><li>iPhone手机拿到证书文件(包含公钥M和公钥M的HASH值)，因为手机里有公钥A，所以能解密证书文件，得到公钥M和公钥M的HASH值，先验证公钥M生成的HASH值(MD5,SHA等)是不是和证书文件里的公钥M的HASH值一致，确保证书没有被修改；</li><li>验证一致后，就可以用公钥M来解密第2步的APP的签名，同样道理可以验证App是否被修改过。 因为在开发阶段App会经常修改，所以App就算是修改过，也能安装。第4步主要是验证证书是不是苹果认证的，只要证书对就可以安装运行。</li></ol></li></ol><p>加密解密：</p><ul><li>mac电脑：私钥M和公钥M(电脑生成)</li><li>苹果服务器：私钥A</li><li>iPhone手机：公钥A</li></ul><p>.ipa包含的信息：</p><ol><li>资源文件，例如图片、html、等等。</li><li>_CodeSignature/CodeResources。这是一个plist文件，可用文本查看，其中的内容就是是程序包中（不包括Frameworks）所有文件的签名。注意这里是所有文件。意味着你的程序一旦签名，就不能更改其中任何的东西，包括资源文件和可执行文件本身。iOS系统会检查这些签名。</li><li>可执行文件。此文件跟资源文件一样需要签名。</li><li>一个mobileprovision文件.打包的时候使用的，从MC上生成的。</li><li>Frameworks。程序引用的非系统自带的Frameworks，每个Frameworks其实就是一个app，其中的结构应该和app差不多，也包含签名信息CodeResources文件。</li></ol><h3 id="签名原理图："><a href="#签名原理图：" class="headerlink" title="签名原理图："></a>签名原理图：</h3><figure class="image-bubble">                <div class="img-lightbox">                    <div class="overlay"></div>                    <img src="//yoursite.com/2019/06/26/App签名原理/sign.png" alt="sign" title>                </div>                <div class="image-caption">sign</div>            </figure>]]></content>
+    <content type="html"><![CDATA[<p>App签名是为了保证每个App都是经过苹果公司官方认证的。iPhone和系统都是苹果公司生产的，所以苹果公司可以在手机上内置公钥，App Store上内置私钥。</p><a id="more"></a><p>苹果签名需求：</p><ul><li>为了保证系统的安全性，所有iPhone上安装的应用必须是经过苹果授权的</li><li>安装包不需要上传到App Store也能被安装 （开发调试 企业灰度）</li><li>防止证书权限滥用：设备限制、指定APP、iCloud/PUSH/后台运行等附加权限控制</li></ul><h3 id="下载App签名"><a href="#下载App签名" class="headerlink" title="下载App签名"></a>下载App签名</h3><p>签名原理：</p><ol><li>App上传到App Store时，苹果公司拿到App的HASH(MD5,SHA等)值，然后用私钥进行加密(签名)，这时候只有手机上的公钥才可以解密；</li><li>手机下载应用安装App时，先用公钥解密(验证签名)，拿到HASH值，然后将此HASH值，与要安装的App的HASH值进行校验，如果App有被修改过，则校验失败。这样就可以有效的保证每个App都是经过苹果公司官方认证的。</li></ol><h3 id="双层签名"><a href="#双层签名" class="headerlink" title="双层签名"></a>双层签名</h3><p>真机调试，企业包上面的签名方式就不适合了。这时候需要双层签名：</p><ol><li>在Mac系统中生成一对非对称加密算法的公私钥M（keychain 里的 <code>从证书颁发机构请求证书</code>，保存的CertificateSigningRequest就包含公钥M，私钥保存在本地）。</li><li>苹果自己有固定的一对公私钥：私钥A在苹果后台，公钥A在每个iOS系统的手机中。</li><li>申请证书，把CertificateSigningRequest.certSigningRequest文件（包含公钥M，以及一些开发者信息）发送给苹果后台，用苹果后台的私钥A对公钥M签名，得到一份包含公钥M以及其签名结果的数据就是证书。<ul><li>生成的证书下载下来，keychain会把这两个证书关联起来，因为公私钥是对应的。这个私钥只有这台电脑有，团队开发需要把这个私钥导出.p12给其他Mac.</li></ul></li><li>配置 AppID / 权限 / 设备等，最后下载 Provisioning Profile 文件（包含设备IDs,AppID,Entitlements(权力文件包含是否可调试，推送，后台运行等信息)）。</li><li>XCode 会通过第3步下载回来的证书（存着公钥），在本地找到对应的私钥（第1步生成的），用本地私钥去签名 App，并把 Provisioning Profile 文件命名为 embedded.mobileprovision 一起打包进去。<ul><li>打包过程用私钥M对App的HASH值进行加密(签名)，这时的APP内部实际包含了APP的签名(私钥M加密App的HASH值)、第3步生成的证书文件(包含公钥M和公钥M的HASH值)、Provision Profile(描述文件)，App可执行文件以及其他信息</li></ul></li><li>解密：<ol><li>iPhone手机拿到证书文件(包含公钥M和公钥M的HASH值)，因为手机里有公钥A，所以能解密证书文件，得到公钥M和公钥M的HASH值，先验证公钥M生成的HASH值(MD5,SHA等)是不是和证书文件里的公钥M的HASH值一致，确保证书没有被修改；</li><li>验证一致后，就可以用公钥M来解密第2步的APP的签名，同样道理可以验证App是否被修改过。 因为在开发阶段App会经常修改，所以App就算是修改过，也能安装。第4步主要是验证证书是不是苹果认证的，只要证书对就可以安装运行。</li></ol></li></ol><p>加密解密：</p><ul><li>mac电脑：私钥M和公钥M(电脑生成)</li><li>苹果服务器：私钥A</li><li>iPhone手机：公钥A</li></ul><p>.ipa包含的信息：</p><ol><li>资源文件，例如图片、html、等等。</li><li>_CodeSignature/CodeResources。这是一个plist文件，可用文本查看，其中的内容就是是程序包中（不包括Frameworks）所有文件的签名。注意这里是所有文件。意味着你的程序一旦签名，就不能更改其中任何的东西，包括资源文件和可执行文件本身。iOS系统会检查这些签名。</li><li>可执行文件。此文件跟资源文件一样需要签名。</li><li>一个mobileprovision文件.打包的时候使用的，从MC上生成的。</li><li>Frameworks。程序引用的非系统自带的Frameworks，每个Frameworks其实就是一个app，其中的结构应该和app差不多，也包含签名信息CodeResources文件。</li></ol><h3 id="签名原理图："><a href="#签名原理图：" class="headerlink" title="签名原理图："></a>签名原理图：</h3><figure class="image-bubble">                <div class="img-lightbox">                    <div class="overlay"></div>                    <img src="//nixzhang5.github.io/App签名原理/sign.png" alt="sign" title>                </div>                <div class="image-caption">sign</div>            </figure>]]></content>
     
     <summary type="html">
     
@@ -31,17 +31,17 @@
     
     </summary>
     
-      <category term="iOS" scheme="http://yoursite.com/categories/iOS/"/>
+      <category term="iOS" scheme="https://nixzhang5.github.io/categories/iOS/"/>
     
     
-      <category term="Encryption" scheme="http://yoursite.com/tags/Encryption/"/>
+      <category term="Encryption" scheme="https://nixzhang5.github.io/tags/Encryption/"/>
     
   </entry>
   
   <entry>
     <title>加密</title>
-    <link href="http://yoursite.com/2019/06/26/%E5%8A%A0%E5%AF%86/"/>
-    <id>http://yoursite.com/2019/06/26/加密/</id>
+    <link href="https://nixzhang5.github.io/%E5%8A%A0%E5%AF%86/"/>
+    <id>https://nixzhang5.github.io/加密/</id>
     <published>2019-06-26T02:27:44.000Z</published>
     <updated>2019-06-26T03:25:10.730Z</updated>
     
@@ -53,17 +53,17 @@
     
     </summary>
     
-      <category term="iOS" scheme="http://yoursite.com/categories/iOS/"/>
+      <category term="iOS" scheme="https://nixzhang5.github.io/categories/iOS/"/>
     
     
-      <category term="Encryption" scheme="http://yoursite.com/tags/Encryption/"/>
+      <category term="Encryption" scheme="https://nixzhang5.github.io/tags/Encryption/"/>
     
   </entry>
   
   <entry>
     <title>AFNetWorking原理(二) AFSecurityPolicy</title>
-    <link href="http://yoursite.com/2019/06/25/AFNetWorking%E5%8E%9F%E7%90%86%E4%BA%8C/"/>
-    <id>http://yoursite.com/2019/06/25/AFNetWorking原理二/</id>
+    <link href="https://nixzhang5.github.io/AFNetWorking%E5%8E%9F%E7%90%86%E4%BA%8C/"/>
+    <id>https://nixzhang5.github.io/AFNetWorking原理二/</id>
     <published>2019-06-25T03:31:07.000Z</published>
     <updated>2019-06-25T10:49:12.251Z</updated>
     
@@ -75,19 +75,19 @@
     
     </summary>
     
-      <category term="iOS" scheme="http://yoursite.com/categories/iOS/"/>
+      <category term="iOS" scheme="https://nixzhang5.github.io/categories/iOS/"/>
     
     
-      <category term="AFNetWorking原理" scheme="http://yoursite.com/tags/AFNetWorking%E5%8E%9F%E7%90%86/"/>
+      <category term="AFNetWorking原理" scheme="https://nixzhang5.github.io/tags/AFNetWorking%E5%8E%9F%E7%90%86/"/>
     
-      <category term="Encryption" scheme="http://yoursite.com/tags/Encryption/"/>
+      <category term="Encryption" scheme="https://nixzhang5.github.io/tags/Encryption/"/>
     
   </entry>
   
   <entry>
     <title>AFNetWorking原理(一) AFURLSessionManager解读</title>
-    <link href="http://yoursite.com/2019/06/21/AFNetWorking%E5%8E%9F%E7%90%86/"/>
-    <id>http://yoursite.com/2019/06/21/AFNetWorking原理/</id>
+    <link href="https://nixzhang5.github.io/AFNetWorking%E5%8E%9F%E7%90%86/"/>
+    <id>https://nixzhang5.github.io/AFNetWorking原理/</id>
     <published>2019-06-21T07:48:30.000Z</published>
     <updated>2019-06-25T03:19:09.896Z</updated>
     
@@ -99,17 +99,17 @@
     
     </summary>
     
-      <category term="iOS" scheme="http://yoursite.com/categories/iOS/"/>
+      <category term="iOS" scheme="https://nixzhang5.github.io/categories/iOS/"/>
     
     
-      <category term="AFNetWorking原理" scheme="http://yoursite.com/tags/AFNetWorking%E5%8E%9F%E7%90%86/"/>
+      <category term="AFNetWorking原理" scheme="https://nixzhang5.github.io/tags/AFNetWorking%E5%8E%9F%E7%90%86/"/>
     
   </entry>
   
   <entry>
     <title>Github Blog With Hexo</title>
-    <link href="http://yoursite.com/2019/06/21/hello-world/"/>
-    <id>http://yoursite.com/2019/06/21/hello-world/</id>
+    <link href="https://nixzhang5.github.io/hello-world/"/>
+    <id>https://nixzhang5.github.io/hello-world/</id>
     <published>2019-06-21T07:40:42.265Z</published>
     <updated>2019-06-24T10:16:01.754Z</updated>
     
@@ -121,10 +121,10 @@
     
     </summary>
     
-      <category term="hexo" scheme="http://yoursite.com/categories/hexo/"/>
+      <category term="hexo" scheme="https://nixzhang5.github.io/categories/hexo/"/>
     
     
-      <category term="hexo" scheme="http://yoursite.com/tags/hexo/"/>
+      <category term="hexo" scheme="https://nixzhang5.github.io/tags/hexo/"/>
     
   </entry>
   
