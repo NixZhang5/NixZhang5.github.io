@@ -21,18 +21,18 @@
     
     
     <meta name="keywords" content="AFNetWorking原理">
-    <meta name="description" content="AFURLRequestSerialization包含了四个部分：  全局方法:AFPercentEscapedStringFromString和AFQueryStringFromParameters。 协议AFURLRequestSerialization提供了一个序列化parameters参数的方法。我们可以把参数转换为查询字符串、HTTP请求体、设置恰当的请求头等。 AFHTTPReques">
+    <meta name="description" content="AFURLRequestSerialization序列化网络请求参数">
 <meta name="keywords" content="AFNetWorking原理">
 <meta property="og:type" content="article">
 <meta property="og:title" content="AFNetWorking原理三 AFURLRequestSerialization">
 <meta property="og:url" content="https://nixzhang5.github.io/AFNetWorking原理三.html">
 <meta property="og:site_name" content="Xinping&#39;s Blog">
-<meta property="og:description" content="AFURLRequestSerialization包含了四个部分：  全局方法:AFPercentEscapedStringFromString和AFQueryStringFromParameters。 协议AFURLRequestSerialization提供了一个序列化parameters参数的方法。我们可以把参数转换为查询字符串、HTTP请求体、设置恰当的请求头等。 AFHTTPReques">
+<meta property="og:description" content="AFURLRequestSerialization序列化网络请求参数">
 <meta property="og:locale" content="en">
-<meta property="og:updated_time" content="2019-06-27T10:41:03.556Z">
+<meta property="og:updated_time" content="2019-07-01T03:39:01.038Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="AFNetWorking原理三 AFURLRequestSerialization">
-<meta name="twitter:description" content="AFURLRequestSerialization包含了四个部分：  全局方法:AFPercentEscapedStringFromString和AFQueryStringFromParameters。 协议AFURLRequestSerialization提供了一个序列化parameters参数的方法。我们可以把参数转换为查询字符串、HTTP请求体、设置恰当的请求头等。 AFHTTPReques">
+<meta name="twitter:description" content="AFURLRequestSerialization序列化网络请求参数">
     
         <link rel="alternate" type="application/atom+xml" title="Xinping&#39;s Blog" href="/atom.xml">
     
@@ -182,15 +182,16 @@
 
         </div>
         <div class="post-content" id="post-content" itemprop="postContent">
-            <p>AFURLRequestSerialization包含了四个部分：</p>
+            <p>AFURLRequestSerialization序列化网络请求参数</p>
+<a id="more"></a>
+
+<p>AFURLRequestSerialization包含了四个部分：</p>
 <ol>
 <li>全局方法:AFPercentEscapedStringFromString和AFQueryStringFromParameters。</li>
 <li>协议AFURLRequestSerialization提供了一个序列化parameters参数的方法。我们可以把参数转换为查询字符串、HTTP请求体、设置恰当的请求头等。</li>
 <li>AFHTTPRequestSerializer继承自AFURLRequestSerialization协议。提供了查询字符串/URL格式的参数序列化、默认请求头处理。同时以提供HTTP状态码和返回数据的验证等工作。<br>_ AFMultipartFormData协议。主要用于添加multipart/form-data请求的Content-Disposition: file; filename=#{generated filename}; name=#{name}” 和 Content-Type: #{generated mimeType}的请求体域。</li>
 <li>类型AFJSONRequestSerializer和AFPropertyListRequestSerializer。主要针对JSON和Plist类型的序列化优化。</li>
 </ol>
-<a id="more"></a>
-
 <h3 id="工具函数"><a href="#工具函数" class="headerlink" title="工具函数"></a>工具函数</h3><h4 id="AFPercentEscapedStringFromString"><a href="#AFPercentEscapedStringFromString" class="headerlink" title="AFPercentEscapedStringFromString"></a>AFPercentEscapedStringFromString</h4><p>把字符串转化成符合标准的URL编码字符串，主要是通过一个字符集NSMutableCharacterSet来定义需要进行转码的字符，再通过-[NSString stringByAddingPercentEncodingWithAllowedCharacters]方法来进行转码。</p>
 <figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line">AFURLRequestSerialization.h</span><br><span class="line"></span><br><span class="line">FOUNDATION_EXPORT <span class="built_in">NSString</span> * AFPercentEscapedStringFromString(<span class="built_in">NSString</span> *string);</span><br><span class="line"></span><br><span class="line">AFURLRequestSerialization.m</span><br><span class="line"></span><br><span class="line"><span class="built_in">NSString</span> * AFPercentEscapedStringFromString(<span class="built_in">NSString</span> *string) &#123;</span><br><span class="line">    <span class="comment">// does not include "?" or "/" due to RFC 3986 - Section 3.4</span></span><br><span class="line">    <span class="keyword">static</span> <span class="built_in">NSString</span> * <span class="keyword">const</span> kAFCharactersGeneralDelimitersToEncode = <span class="string">@":#[]@"</span>;</span><br><span class="line">    <span class="keyword">static</span> <span class="built_in">NSString</span> * <span class="keyword">const</span> kAFCharactersSubDelimitersToEncode = <span class="string">@"!$&amp;'()*+,;="</span>;</span><br><span class="line"></span><br><span class="line">    <span class="built_in">NSMutableCharacterSet</span> * allowedCharacterSet = [[<span class="built_in">NSCharacterSet</span> URLQueryAllowedCharacterSet] mutableCopy];</span><br><span class="line">    [allowedCharacterSet removeCharactersInString:[kAFCharactersGeneralDelimitersToEncode stringByAppendingString:kAFCharactersSubDelimitersToEncode]];</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> <span class="built_in">NSUInteger</span> <span class="keyword">const</span> batchSize = <span class="number">50</span>;</span><br><span class="line"></span><br><span class="line">    <span class="built_in">NSUInteger</span> index = <span class="number">0</span>;</span><br><span class="line">    <span class="built_in">NSMutableString</span> *escaped = <span class="string">@""</span>.mutableCopy;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">while</span> (index &lt; string.length) &#123;</span><br><span class="line">        <span class="built_in">NSUInteger</span> length = MIN(string.length - index, batchSize);</span><br><span class="line">        <span class="built_in">NSRange</span> range = <span class="built_in">NSMakeRange</span>(index, length);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// To avoid breaking up character sequences such as 👴🏻👮🏽</span></span><br><span class="line">        range = [string rangeOfComposedCharacterSequencesForRange:range];</span><br><span class="line"></span><br><span class="line">        <span class="built_in">NSString</span> *substring = [string substringWithRange:range];</span><br><span class="line">        <span class="built_in">NSString</span> *encoded = [substring stringByAddingPercentEncodingWithAllowedCharacters:allowedCharacterSet];</span><br><span class="line">        [escaped appendString:encoded];</span><br><span class="line"></span><br><span class="line">        index += range.length;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> escaped;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
@@ -299,9 +300,7 @@
         </a>
       </li>
       <li>
-        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://nixzhang5.github.io/AFNetWorking原理三.html&title=《AFNetWorking原理三 AFURLRequestSerialization》 — Xinping's Blog&source=AFURLRequestSerialization包含了四个部分：
-
-全局方法:AFPercentEscapedStringFromString和AFQu..." data-title=" QQ">
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://nixzhang5.github.io/AFNetWorking原理三.html&title=《AFNetWorking原理三 AFURLRequestSerialization》 — Xinping's Blog&source=AFURLRequestSerialization序列化网络请求参数" data-title=" QQ">
           <i class="icon icon-qq"></i>
         </a>
       </li>
@@ -425,9 +424,7 @@
         </a>
       </li>
       <li>
-        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://nixzhang5.github.io/AFNetWorking原理三.html&title=《AFNetWorking原理三 AFURLRequestSerialization》 — Xinping's Blog&source=AFURLRequestSerialization包含了四个部分：
-
-全局方法:AFPercentEscapedStringFromString和AFQu..." data-title=" QQ">
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://nixzhang5.github.io/AFNetWorking原理三.html&title=《AFNetWorking原理三 AFURLRequestSerialization》 — Xinping's Blog&source=AFURLRequestSerialization序列化网络请求参数" data-title=" QQ">
           <i class="icon icon-qq"></i>
         </a>
       </li>

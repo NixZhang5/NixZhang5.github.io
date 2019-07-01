@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.9.0">
+    
+
+    
+
+    
+
+
+
+    <meta charset="utf-8">
+    
+    
+    
+    
+    <title>WKWebView和UIWebView对比 | Xinping&#39;s Blog | 因为有了危机感，所以才会义无反顾。</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    
+    <meta name="theme-color" content="#3F51B5">
+    
+    
+    <meta name="keywords" content="WebView">
+    <meta name="description" content="WKWebView和UIWebViewUIWebView自iOS2就有，WKWebView从iOS8才有，毫无疑问WKWebView将逐步取代笨重的UIWebView。通过简单的测试即可发现UIWebView占用过多内存，且内存峰值更是夸张。WKWebView网页加载速度也有提升，但是并不像内存那样提升那么多。">
+<meta name="keywords" content="WebView">
+<meta property="og:type" content="article">
+<meta property="og:title" content="WKWebView和UIWebView对比">
+<meta property="og:url" content="https://nixzhang5.github.io/WKWebView和UIWebView.html">
+<meta property="og:site_name" content="Xinping&#39;s Blog">
+<meta property="og:description" content="WKWebView和UIWebViewUIWebView自iOS2就有，WKWebView从iOS8才有，毫无疑问WKWebView将逐步取代笨重的UIWebView。通过简单的测试即可发现UIWebView占用过多内存，且内存峰值更是夸张。WKWebView网页加载速度也有提升，但是并不像内存那样提升那么多。">
+<meta property="og:locale" content="en">
+<meta property="og:updated_time" content="2019-07-01T10:52:12.776Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="WKWebView和UIWebView对比">
+<meta name="twitter:description" content="WKWebView和UIWebViewUIWebView自iOS2就有，WKWebView从iOS8才有，毫无疑问WKWebView将逐步取代笨重的UIWebView。通过简单的测试即可发现UIWebView占用过多内存，且内存峰值更是夸张。WKWebView网页加载速度也有提升，但是并不像内存那样提升那么多。">
+    
+        <link rel="alternate" type="application/atom+xml" title="Xinping&#39;s Blog" href="/atom.xml">
+    
+    <link rel="shortcut icon" href="/img/favicon.ico">
+    <link rel="stylesheet" href="//unpkg.com/hexo-theme-material-indigo@latest/css/style.css">
+    <script>window.lazyScripts=[]</script>
+
+    <!-- custom head -->
+    
+
+</head>
+
+<body>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide" >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap" style="background-image:url(/img/brand.jpg)">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/avatar.jpg">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname">张新平</h5>
+          <a href="mailto:351235445@qq.com" title="351235445@qq.com" class="mail">351235445@qq.com</a>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <i class="icon icon-lg icon-home"></i>
+                主页
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/archives"  >
+                <i class="icon icon-lg icon-archives"></i>
+                Archives
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags"  >
+                <i class="icon icon-lg icon-tags"></i>
+                Tags
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories"  >
+                <i class="icon icon-lg icon-th-list"></i>
+                Categories
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/NixZhang5" target="_blank" >
+                <i class="icon icon-lg icon-github"></i>
+                Github
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">WKWebView和UIWebView对比</div>
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="Search">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menuShare">
+            <i class="icon icon-lg icon-share-alt"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header">
+
+    <div class="container fade-scale">
+        <h1 class="title">WKWebView和UIWebView对比</h1>
+        <h5 class="subtitle">
+            
+                <time datetime="2019-07-01T03:51:54.000Z" itemprop="datePublished" class="page-time">
+  2019-07-01
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/iOS/">iOS</a></li></ul>
+
+            
+        </h5>
+    </div>
+
+    
+
+
+</header>
+
+
+<div class="container body-wrap">
+    
+    <aside class="post-widget">
+        <nav class="post-toc-wrap post-toc-shrink" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#WKWebView和UIWebView"><span class="post-toc-number">1.</span> <span class="post-toc-text">WKWebView和UIWebView</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#UIWebView-OC和JS相互调用"><span class="post-toc-number">2.</span> <span class="post-toc-text">UIWebView OC和JS相互调用</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#WKWebView-OC和JS相互调用"><span class="post-toc-number">3.</span> <span class="post-toc-text">WKWebView OC和JS相互调用</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#Cookie问题"><span class="post-toc-number">4.</span> <span class="post-toc-text">Cookie问题</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#WKWebView-Cookie存储"><span class="post-toc-number">4.1.</span> <span class="post-toc-text">WKWebView Cookie存储</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#WKProcessPool"><span class="post-toc-number">4.2.</span> <span class="post-toc-text">WKProcessPool</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#Workaround"><span class="post-toc-number">4.3.</span> <span class="post-toc-text">Workaround</span></a></li></ol></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#白屏问题"><span class="post-toc-number">5.</span> <span class="post-toc-text">白屏问题</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#NSURLProtocol问题"><span class="post-toc-number">6.</span> <span class="post-toc-text">NSURLProtocol问题</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#loadRequest-问题"><span class="post-toc-number">7.</span> <span class="post-toc-text">loadRequest 问题</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#样式问题"><span class="post-toc-number">8.</span> <span class="post-toc-text">样式问题</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#截屏问题"><span class="post-toc-number">9.</span> <span class="post-toc-text">截屏问题</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#crash问题"><span class="post-toc-number">10.</span> <span class="post-toc-text">crash问题</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#其他问题"><span class="post-toc-number">11.</span> <span class="post-toc-text">其他问题</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#视频自动播放"><span class="post-toc-number">11.1.</span> <span class="post-toc-text">视频自动播放</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#goBack-API问题"><span class="post-toc-number">11.2.</span> <span class="post-toc-text">goBack API问题</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#页面滚动速率"><span class="post-toc-number">11.3.</span> <span class="post-toc-text">页面滚动速率</span></a></li></ol></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#优化"><span class="post-toc-number">12.</span> <span class="post-toc-text">优化</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#初始化优化"><span class="post-toc-number">12.1.</span> <span class="post-toc-text">初始化优化</span></a></li></ol></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#建立连接-服务器处理"><span class="post-toc-number">13.</span> <span class="post-toc-text">建立连接/服务器处理</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#页面框架渲染"><span class="post-toc-number">13.1.</span> <span class="post-toc-text">页面框架渲染</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#JS加载"><span class="post-toc-number">13.2.</span> <span class="post-toc-text">JS加载</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#WebView性能优化总结"><span class="post-toc-number">13.3.</span> <span class="post-toc-text">WebView性能优化总结</span></a></li></ol></li></ol>
+        </nav>
+    </aside>
+
+
+<article id="post-WKWebView和UIWebView"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">WKWebView和UIWebView对比</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2019-07-01 11:51:54" datetime="2019-07-01T03:51:54.000Z"  itemprop="datePublished">2019-07-01</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/iOS/">iOS</a></li></ul>
+
+
+
+            
+
+        </div>
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <h3 id="WKWebView和UIWebView"><a href="#WKWebView和UIWebView" class="headerlink" title="WKWebView和UIWebView"></a>WKWebView和UIWebView</h3><p>UIWebView自iOS2就有，WKWebView从iOS8才有，毫无疑问WKWebView将逐步取代笨重的UIWebView。通过简单的测试即可发现UIWebView占用过多内存，且内存峰值更是夸张。WKWebView网页加载速度也有提升，但是并不像内存那样提升那么多。</p>
+<a id="more"></a>
+
+<p>WKWebView的优势：</p>
+<ol>
+<li>性能和稳定性的大幅提高</li>
+<li>内存占用的减少，大概是UIWebView的1/4 - 1/3</li>
+<li>更多的支持HTML5的特性<ul>
+<li>允许JavaScript的Nitro的库加载并使用（移动设备的 Safari 使用 Nitro 引擎，但是 UIWebView 不包括 JIT 编译，所以不支持，体验会慢一些）</li>
+</ul>
+</li>
+<li>官方宣称的高达60fps的滚动刷新率以及内置手势</li>
+<li>Safari相同的JavaScript引擎</li>
+<li>将UIWebViewDelegate与UIWebView拆分成了14类与3个协议(官方文档说明)，JS交互方便</li>
+<li>另外用的比较多的，增加加载进度属性：estimatedProgress</li>
+</ol>
+<p>WKWebView的缺点：</p>
+<ol>
+<li>不自带cookie</li>
+<li>获取cookie</li>
+<li>不支持自定义NSURLProtocol，否则无法发送POST参数</li>
+</ol>
+<h3 id="UIWebView-OC和JS相互调用"><a href="#UIWebView-OC和JS相互调用" class="headerlink" title="UIWebView OC和JS相互调用"></a>UIWebView OC和JS相互调用</h3><p><strong>OC调用JS代码</strong></p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">- (<span class="keyword">nullable</span> <span class="built_in">NSString</span> *)stringByEvaluatingJavaScriptFromString:(<span class="built_in">NSString</span> *)string;</span><br></pre></td></tr></table></figure>
+
+<p><strong>JS调用OC代码</strong><br>在代理方法里面拦截实现</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">让Native 代码拦截， </span><br><span class="line">- (<span class="built_in">BOOL</span>)webView:(<span class="built_in">UIWebView</span> *)webView </span><br><span class="line">shouldStartLoadWithRequest:(<span class="built_in">NSURLRequest</span>:)request </span><br><span class="line">navigationType:(<span class="built_in">UIWebViewNavigationType</span>)navigationType;</span><br></pre></td></tr></table></figure>
+
+<h3 id="WKWebView-OC和JS相互调用"><a href="#WKWebView-OC和JS相互调用" class="headerlink" title="WKWebView OC和JS相互调用"></a>WKWebView OC和JS相互调用</h3><p><strong>OC调用JS</strong><br>WKWebView 本身提供一个方法进行处理JS代码</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">- (<span class="keyword">void</span>)evaluateJavaScript:(<span class="built_in">NSString</span> *)javaScriptString completionHandler:(<span class="keyword">void</span> (^_Nullable)(_Nullable <span class="keyword">id</span>,<span class="built_in">NSError</span> * _Nullable error))completionHandler;</span><br></pre></td></tr></table></figure>
+
+<p><strong>JS调用OC</strong><br>JS端调用操作</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">window</span>.webkit.messageHandlers.&lt;方法名&gt;.postMessage(&lt;数据&gt;)</span><br></pre></td></tr></table></figure>
+
+<p>在OC中的处理方法</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">- (<span class="keyword">void</span>)addScriptMessageHandler:(<span class="keyword">id</span>&lt;<span class="built_in">WKScriptMessageHandler</span>&gt;)scriptMessageHandler name:(<span class="built_in">NSString</span> *)name;</span><br></pre></td></tr></table></figure>
+
+<p>使用方法</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//设置addScriptMessageHandler与name.并且设置&lt;WKScriptMessageHandler&gt;协议与协议方法</span></span><br><span class="line">[[_webView configuration].userContentController addScriptMessageHandler:<span class="keyword">self</span> name:<span class="string">@"方法名"</span>];</span><br><span class="line"></span><br><span class="line"><span class="comment">//WKScriptMessageHandler协议方法</span></span><br><span class="line">- (<span class="keyword">void</span>)userContentController:(<span class="built_in">WKUserContentController</span> *)userContentController didReceiveScriptMessage:(<span class="built_in">WKScriptMessage</span> *)message &#123;</span><br><span class="line">    <span class="comment">//code</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这里会导致内存泄露，因为这里userContentController持有了self，然后 userContentController 又被configuration持有，最终被webview持有，然后webview是self的一个私有变量，所以self也持有self。</p>
+<p>解决办法：</p>
+<ol>
+<li>在viewWillAppear和viewWillDisappear注册和移除</li>
+<li>将传入的vc实例参数通过一个过度类来实现，此时vc的dealloc方法会调用在销毁方法里边释放掉注册的方法</li>
+</ol>
+<h3 id="Cookie问题"><a href="#Cookie问题" class="headerlink" title="Cookie问题"></a>Cookie问题</h3><p>cookie（是存储在客户端的，本质是个字符串）:<br>cookie是随着数据请求，传来传去的，也就是每个request，response，都携带有cookie<br>cookie的内容主要包括：名字，值，过期时间，路径和域。路径与域一起构成cookie的作用范围。若不设置过期时间，则表示这个cookie的生命期为浏览器会话期间，关闭浏览器窗口，cookie就消失</p>
+<h4 id="WKWebView-Cookie存储"><a href="#WKWebView-Cookie存储" class="headerlink" title="WKWebView Cookie存储"></a>WKWebView Cookie存储</h4><p>业界普遍认为 WKWebView 拥有自己的私有存储，不会将 Cookie 存入到标准的 Cookie 容器 NSHTTPCookieStorage 中。</p>
+<p>实践发现 WKWebView 实例其实也会将 Cookie 存储于 NSHTTPCookieStorage 中，但存储时机有延迟，在iOS 8上，当页面跳转的时候，当前页面的 Cookie 会写入 NSHTTPCookieStorage 中，而在 iOS 10 上，JS 执行 document.cookie 或服务器 set-cookie 注入的 Cookie 会很快同步到 NSHTTPCookieStorage 中。</p>
+<p>WKWebView Cookie 问题在于 WKWebView 发起的请求不会自动带上存储于 NSHTTPCookieStorage 容器中的 Cookie。</p>
+<p>比如，NSHTTPCookieStorage 中存储了一个 Cookie:</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">name=Nicholas;value=test;domain=y.qq.com;expires=Sat, <span class="number">02</span> May <span class="number">2019</span> <span class="number">23</span>:<span class="number">38</span>:<span class="number">25</span> GMT；</span><br></pre></td></tr></table></figure>
+
+<p>通过 UIWebView 发起请求，则请求头会自动带上 cookie: Nicholas=test；<br>而通过 WKWebView发起请求，请求头不会自动带上 cookie: Nicholas=test。</p>
+<h4 id="WKProcessPool"><a href="#WKProcessPool" class="headerlink" title="WKProcessPool"></a>WKProcessPool</h4><p>通过让所有 WKWebView 共享同一个 WKProcessPool 实例，可以实现多个 WKWebView 之间共享 Cookie（session Cookie and persistent Cookie）数据。不过 WKWebView WKProcessPool 实例在 app 杀进程重启后会被重置，导致 WKProcessPool 中的 Cookie、session Cookie 数据丢失，目前也无法实现 WKProcessPool 实例本地化保存。</p>
+<h4 id="Workaround"><a href="#Workaround" class="headerlink" title="Workaround"></a>Workaround</h4><p>由于许多 H5 业务都依赖于 Cookie 作登录态校验，而 WKWebView 上请求不会自动携带 Cookie, 目前的主要解决方案是：</p>
+<p>a、WKWebView loadRequest 前，在 request header 中设置 Cookie, 解决首个请求 Cookie 带不上的问题；</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">WKWebView</span> * webView = [<span class="built_in">WKWebView</span> new]; </span><br><span class="line"><span class="built_in">NSMutableURLRequest</span> * request = [<span class="built_in">NSMutableURLRequest</span> requestWithURL:[<span class="built_in">NSURL</span> URLWithString:<span class="string">@"http://h5.qzone.qq.com/mqzone/index"</span>]]; </span><br><span class="line"></span><br><span class="line">[request addValue:<span class="string">@"skey=skeyValue"</span> forHTTPHeaderField:<span class="string">@"Cookie"</span>]; </span><br><span class="line">[webView loadRequest:request];</span><br></pre></td></tr></table></figure>
+
+<p>b、通过 document.cookie 设置 Cookie 解决后续页面(同域)Ajax、iframe 请求的 Cookie 问题；<br>注意：document.cookie()无法跨域设置 cookie</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">WKUserContentController</span>* userContentController = [<span class="built_in">WKUserContentController</span> new]; </span><br><span class="line"><span class="built_in">WKUserScript</span> * cookieScript = [[<span class="built_in">WKUserScript</span> alloc] initWithSource: <span class="string">@"document.cookie = 'skey=skeyValue';"</span> injectionTime:<span class="built_in">WKUserScriptInjectionTimeAtDocumentStart</span> forMainFrameOnly:<span class="literal">NO</span>]; </span><br><span class="line"></span><br><span class="line">[userContentController addUserScript:cookieScript];</span><br></pre></td></tr></table></figure>
+
+<p>这种方案无法解决302请求的 Cookie 问题，比如，第一个请求是 <a href="http://www.a.com" target="_blank" rel="noopener">www.a.com</a>, 我们通过在 request header 里带上 Cookie 解决该请求的 Cookie 问题，接着页面302跳转到 <a href="http://www.b.com" target="_blank" rel="noopener">www.b.com</a>, 这个时候 <a href="http://www.b.com" target="_blank" rel="noopener">www.b.com</a> 这个请求就可能因为没有携带 cookie 而无法访问。当然，由于每一次页面跳转前都会调用回调函数：</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">- (<span class="keyword">void</span>)webView:(<span class="built_in">WKWebView</span> *)webView decidePolicyForNavigationAction:(<span class="built_in">WKNavigationAction</span> *)navigationAction decisionHandler:(<span class="keyword">void</span> (^)(<span class="built_in">WKNavigationActionPolicy</span>))decisionHandler;</span><br></pre></td></tr></table></figure>
+
+<p>可以在该回调函数里拦截302请求，copy request，在 request header 中带上 cookie 并重新 loadRequest。不过这种方法依然解决不了页面 iframe 跨域请求的 Cookie 问题，毕竟-[WKWebView loadRequest:]只适合加载 mainFrame 请求。</p>
+<h3 id="白屏问题"><a href="#白屏问题" class="headerlink" title="白屏问题"></a>白屏问题</h3><p>WKWebView 自诩拥有更快的加载速度，更低的内存占用，但实际上 WKWebView 是一个多进程组件，Network Loading 以及 UI Rendering 在其它进程中执行。初次适配 WKWebView 的时候，我们也惊讶于打开 WKWebView 后，App 进程内存消耗反而大幅下降，但是仔细观察会发现，Other Process 的内存占用会增加。在一些用 webGL 渲染的复杂页面，使用 WKWebView 总体的内存占用（App Process Memory + Other Process Memory）不见得比 UIWebView 少很多。</p>
+<p>在 UIWebView 上当内存占用太大的时候，App Process 会 crash；而在 WKWebView 上当总体的内存占用比较大的时候，WebContent Process 会 crash，从而出现白屏现象。</p>
+<p>这个时候 WKWebView.URL 会变为 nil, 简单的 reload 刷新操作已经失效，对于一些长驻的H5页面影响比较大。</p>
+<p>解决方案：</p>
+<ol>
+<li>借助 WKNavigtionDelegate<br>iOS 9以后 WKNavigtionDelegate 新增了一个回调函数：<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">- (<span class="keyword">void</span>)webViewWebContentProcessDidTerminate:(<span class="built_in">WKWebView</span> *)webView API_AVAILABLE(macosx(<span class="number">10.11</span>), ios(<span class="number">9.0</span>));</span><br></pre></td></tr></table></figure>
+
+</li>
+</ol>
+<p>当 WKWebView 总体内存占用过大，页面即将白屏的时候，系统会调用上面的回调函数，我们在该函数里执行[webView reload](这个时候 webView.URL 取值尚不为 nil）解决白屏问题。在一些高内存消耗的页面可能会频繁刷新当前页面，H5侧也要做相应的适配操作。</p>
+<ol start="2">
+<li>检测 webView.title 是否为空<br>并不是所有H5页面白屏的时候都会调用上面的回调函数，比如，最近遇到在一个高内存消耗的H5页面上 present 系统相机，拍照完毕后返回原来页面的时候出现白屏现象（拍照过程消耗了大量内存，导致内存紧张，WebContent Process 被系统挂起），但上面的回调函数并没有被调用。在WKWebView白屏的时候，另一种现象是 webView.titile 会被置空, 因此，可以在 viewWillAppear 的时候检测 webView.title 是否为空来 reload 页面。</li>
+</ol>
+<h3 id="NSURLProtocol问题"><a href="#NSURLProtocol问题" class="headerlink" title="NSURLProtocol问题"></a>NSURLProtocol问题</h3><p>WKWebView 在独立于 app 进程之外的进程中执行网络请求，请求数据不经过主进程，因此，在 WKWebView 上直接使用 NSURLProtocol 无法拦截请求。苹果开源的 webKit2 源码暴露了私有API：</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">+ [<span class="built_in">WKBrowsingContextController</span> registerSchemeForCustomProtocol:]</span><br></pre></td></tr></table></figure>
+
+<p>通过注册 http(s) scheme 后 WKWebView 将可以使用 NSURLProtocol 拦截 http(s) 请求：</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">Class cls = <span class="built_in">NSClassFromString</span>(<span class="string">@"WKBrowsingContextController”); </span></span><br><span class="line"><span class="string">SEL sel = NSSelectorFromString(@"</span>registerSchemeForCustomProtocol:<span class="string">"); </span></span><br><span class="line"><span class="string">if ([(id)cls respondsToSelector:sel]) &#123; </span></span><br><span class="line"><span class="string">           // 注册http(s) scheme, 把 http和https请求交给 NSURLProtocol处理 </span></span><br><span class="line"><span class="string">           [(id)cls performSelector:sel withObject:@"</span>http<span class="string">"]; </span></span><br><span class="line"><span class="string">           [(id)cls performSelector:sel withObject:@"</span>https<span class="string">"]; </span></span><br><span class="line"><span class="string">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<p>但是这种方案目前存在两个严重缺陷：</p>
+<ol>
+<li><p>post 请求 body 数据被清空<br>由于 WKWebView 在独立进程里执行网络请求。一旦注册 http(s) scheme 后，网络请求将从 Network Process 发送到 App Process，这样 NSURLProtocol 才能拦截网络请求。在 webkit2 的设计里使用 MessageQueue 进行进程之间的通信，Network Process 会将请求 encode 成一个 Message,然后通过 IPC 发送给 App Process。出于性能的原因，encode 的时候 HTTPBody 和 HTTPBodyStream 这两个字段被丢弃掉了。</p>
+<p> 因此，如果通过 registerSchemeForCustomProtocol 注册了 http(s) scheme, 那么由 WKWebView 发起的所有 http(s)请求都会通过 IPC 传给主进程 NSURLProtocol 处理，导致 post 请求 body 被清空；</p>
+</li>
+<li><p>对ATS支持不足<br>测试发现一旦打开ATS开关：Allow Arbitrary Loads 选项设置为NO，同时通过 registerSchemeForCustomProtocol 注册了 http(s) scheme，WKWebView 发起的所有 http 网络请求将被阻塞（即便将Allow Arbitrary Loads in Web Content 选项设置为YES）；</p>
+<p> WKWebView 可以注册 customScheme, 比如 dynamic://, 因此希望使用离线功能又不使用 post 方式的请求可以通过 customScheme 发起请求，比如 dynamic://<a href="http://www.dynamicalbumlocalimage.com/" target="_blank" rel="noopener">www.dynamicalbumlocalimage.com/</a>, 然后在 app 进程 NSURLProtocol 拦截这个请求并加载离线数据。不足：使用 post 方式的请求该方案依然不适用，同时需要 H5 侧修改请求 scheme 以及 CSP 规则；</p>
+</li>
+</ol>
+<h3 id="loadRequest-问题"><a href="#loadRequest-问题" class="headerlink" title="loadRequest 问题"></a>loadRequest 问题</h3><p>在 WKWebView 上通过 loadRequest 发起的 post 请求 body 数据会丢失：</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//同样是由于进程间通信性能问题，HTTPBody字段被丢弃</span></span><br><span class="line">[request setHTTPMethod:<span class="string">@"POST"</span>];</span><br><span class="line">[request setHTTPBody:[<span class="string">@"bodyData"</span> dataUsingEncoding:<span class="built_in">NSUTF8StringEncoding</span>]];</span><br><span class="line">[wkwebview loadRequest: request];</span><br></pre></td></tr></table></figure>
+
+<p>workaround:<br>假如想通过-[WKWebView loadRequest:]加载 post 请求 request1: <a href="http://h5.qzone.qq.com/mqzone/index" target="_blank" rel="noopener">http://h5.qzone.qq.com/mqzone/index</a>, 可以通过以下步骤实现：</p>
+<ol>
+<li>替换请求 scheme，生成新的 post 请求 request2: post://h5.qzone.qq.com/mqzone/index, 同时将 request1 的 body 字段复制到 request2 的 header 中（WebKit 不会丢弃 header 字段）;</li>
+<li>通过-[WKWebView loadRequest:]加载新的 post 请求 request2;</li>
+<li>通过 +[WKBrowsingContextController registerSchemeForCustomProtocol:]注册 scheme: post://;</li>
+<li>注册 NSURLProtocol 拦截请求post://h5.qzone.qq.com/mqzone/index ,替换请求 scheme, 生成新的请求 request3: <a href="http://h5.qzone.qq.com/mqzone/index" target="_blank" rel="noopener">http://h5.qzone.qq.com/mqzone/index</a>, 将 request2 header的body 字段复制到 request3 的 body 中，并使用 NSURLConnection 加载 request3，最后通过 NSURLProtocolClient 将加载结果返回 WKWebView;</li>
+</ol>
+<h3 id="样式问题"><a href="#样式问题" class="headerlink" title="样式问题"></a>样式问题</h3><p>在 WKWebView 适配过程中，我们发现部分H5页面元素位置向下偏移或被拉伸变形，追踪后发现主要是H5页面高度值异常导致：</p>
+<p>a. 空间H5页面有透明导航、透明导航下拉刷新、全屏等需求，因此之前 webView 整个是从（0, 0）开始布局，通过调整webView.scrollView.contentInset 来适配特殊导航栏需求。而在 WKWebView 上对 contentInset 的调整会反馈到webView.scrollView.contentSize.height的变化上，比如设置 webView.scrollView.contentInset.top = a，那么contentSize.height的值会增加a,导致H5页面长度增加，页面元素位置向下偏移；</p>
+<p>解决方案是：调整WKWebView布局方式，避免调整webView.scrollView.contentInset。实际上，即便在 UIWebView 上也不建议直接调整webView.scrollView.contentInset的值，这确实会带来一些奇怪的问题。如果某些特殊情况下非得调整 contentInset 不可的话，可以通过下面方式让H5页面恢复正常显示：</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**设置contentInset值后通过调整webView.frame让页面恢复正常显示 </span></span><br><span class="line"><span class="comment"> *参考：http://km.oa.com/articles/show/277372</span></span><br><span class="line"><span class="comment"> */</span> </span><br><span class="line">webView.scrollView.contentInset = <span class="built_in">UIEdgeInsetsMake</span>(a, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>); </span><br><span class="line">webView.frame = <span class="built_in">CGRectMake</span>(webView.frame.origin.x, webView.frame.origin.y, webView.frame.size.width, webView.frame.size.height - a);</span><br></pre></td></tr></table></figure>
+
+<p>b. 在接入 now 直播的时候，我们发现在 iOS 9 上 WKWebView 会出现页面被拉伸变形的情况，最后发现是window.innerHeight值不准确导致（在WKWebView上返回了一个非常大的值），而H5同学通过获取window.innerHeight来设置页面高度，导致页面整体被拉伸。通过查阅相关资料发现，这个bug只在 iOS 9 的几个系统版本上出现，苹果后来fix了这个bug。我们最后的解决方案是：延迟调用window.innerHeight</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">setTimeout(<span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;height = <span class="built_in">window</span>.innerHeight&#125;,<span class="number">0</span>);</span><br></pre></td></tr></table></figure>
+
+<p>或者</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Use shrink-to-fit meta-tag </span><br><span class="line"><span class="tag">&lt;<span class="name">meta</span> <span class="attr">name</span>=<span class="string">"viewport"</span> <span class="attr">content</span>=<span class="string">"width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1, shrink-to-fit=no"</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="截屏问题"><a href="#截屏问题" class="headerlink" title="截屏问题"></a>截屏问题</h3><p>空间玩吧H5小游戏有截屏分享的功能，WKWebView 下通过 -[CALayer renderInContext:]实现截屏的方式失效，需要通过以下方式实现截屏功能：</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">@implementation</span> <span class="title">UIView</span> (<span class="title">ImageSnapshot</span>) </span></span><br><span class="line">- (<span class="built_in">UIImage</span>*)imageSnapshot &#123; </span><br><span class="line">    <span class="built_in">UIGraphicsBeginImageContextWithOptions</span>(<span class="keyword">self</span>.bounds.size,<span class="literal">YES</span>,<span class="keyword">self</span>.contentScaleFactor); </span><br><span class="line">    [<span class="keyword">self</span> drawViewHierarchyInRect:<span class="keyword">self</span>.bounds afterScreenUpdates:<span class="literal">YES</span>]; </span><br><span class="line">    <span class="built_in">UIImage</span>* newImage = <span class="built_in">UIGraphicsGetImageFromCurrentImageContext</span>(); </span><br><span class="line">    <span class="built_in">UIGraphicsEndImageContext</span>(); </span><br><span class="line">    <span class="keyword">return</span> newImage; </span><br><span class="line">&#125; </span><br><span class="line"><span class="keyword">@end</span></span><br></pre></td></tr></table></figure>
+
+<p>然而这种方式依然解决不了 webGL 页面的截屏问题，webKit2 源码里的截屏私有API，也没有找到合适的解决方案，同时发现 Safari 以及 Chrome 这两个全量切换到 WKWebView 的浏览器也存在同样的问题：对webGL 页面的截屏结果不是空白就是纯黑图片。无奈之下，我们只能约定一个JS接口，让游戏开发商实现该接口，具体是通过 canvas getImageData()方法取得图片数据后返回 base64 格式的数据，客户端在需要截图的时候，调用这个JS接口获取 base64 String 并转换成 UIImage。</p>
+<h3 id="crash问题"><a href="#crash问题" class="headerlink" title="crash问题"></a>crash问题</h3><p>WKWebView 放量后，外网新增了一些 crash, 其中一类 crash 的主要堆栈如下：</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">... </span><br><span class="line"><span class="number">28</span> <span class="built_in">UIKit</span> <span class="number">0x0000000190513360</span> <span class="built_in">UIApplicationMain</span> + <span class="number">208</span> </span><br><span class="line"><span class="number">29</span> Qzone <span class="number">0x0000000101380570</span> main (main.m:<span class="number">181</span>) </span><br><span class="line"><span class="number">30</span> libdyld.dylib <span class="number">0x00000001895205b8</span> _dyld_process_info_notify_release + <span class="number">36</span> </span><br><span class="line">Completion handler passed to -[QZWebController webView:runJavaScriptAlertPanelWithMessage:initiatedByFrame:completionHandler:] was not called</span><br></pre></td></tr></table></figure>
+
+<p>主要是JS调用window.alert()函数引起的，从 crash 堆栈可以看出是 WKWebView 回调函数:</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">+ (<span class="keyword">void</span>) presentAlertOnController:(<span class="keyword">nonnull</span> <span class="built_in">UIViewController</span>*)parentController title:(<span class="keyword">nullable</span> <span class="built_in">NSString</span>*)title message:(<span class="keyword">nullable</span> <span class="built_in">NSString</span> *)message handler:(<span class="keyword">nonnull</span> <span class="keyword">void</span> (^)())completionHandler;</span><br></pre></td></tr></table></figure>
+
+<p>completionHandler 没有被调用导致的。在适配 WKWebView 的时候，我们需要自己实现该回调函数，window.alert()才能调起 alert 框，我们最初的实现是这样的：</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">- (<span class="keyword">void</span>)webView:(<span class="built_in">WKWebView</span> *)webView runJavaScriptAlertPanelWithMessage:(<span class="built_in">NSString</span> *)message initiatedByFrame:(<span class="built_in">WKFrameInfo</span> *)frame completionHandler:(<span class="keyword">void</span> (^)(<span class="keyword">void</span>))completionHandler </span><br><span class="line">&#123; </span><br><span class="line">    <span class="built_in">UIAlertController</span> *alertController = [<span class="built_in">UIAlertController</span> alertControllerWithTitle:<span class="string">@""</span> message:message preferredStyle:<span class="built_in">UIAlertControllerStyleAlert</span>]; </span><br><span class="line">    [alertController addAction:[<span class="built_in">UIAlertAction</span> actionWithTitle:<span class="string">@"确认"</span> style:<span class="built_in">UIAlertActionStyleCancel</span> handler:^(<span class="built_in">UIAlertAction</span> *action) &#123; completionHandler(); &#125;]]; </span><br><span class="line">    [<span class="keyword">self</span> presentViewController:alertController animated:<span class="literal">YES</span> completion:^&#123;&#125;]; </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>如果 WKWebView 退出的时候，JS刚好执行了window.alert(), alert 框可能弹不出来，completionHandler 最后没有被执行，导致 crash；另一种情况是在 WKWebView 一打开，JS就执行window.alert()，这个时候由于 WKWebView 所在的 UIViewController 出现（push或present）的动画尚未结束，alert 框可能弹不出来，completionHandler 最后没有被执行，导致 crash。我们最终的实现大致是这样的：</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">- (<span class="keyword">void</span>)webView:(<span class="built_in">WKWebView</span> *)webView runJavaScriptAlertPanelWithMessage:(<span class="built_in">NSString</span> *)message initiatedByFrame:(<span class="built_in">WKFrameInfo</span> *)frame completionHandler:(<span class="keyword">void</span> (^)(<span class="keyword">void</span>))completionHandler </span><br><span class="line">&#123; </span><br><span class="line">    <span class="keyword">if</span> (<span class="comment">/*UIViewController of WKWebView has finish push or present animation*/</span>) &#123; </span><br><span class="line">        completionHandler(); </span><br><span class="line">        <span class="keyword">return</span>; </span><br><span class="line">    &#125; </span><br><span class="line">    <span class="built_in">UIAlertController</span> *alertController = [<span class="built_in">UIAlertController</span> alertControllerWithTitle:<span class="string">@""</span> message:message preferredStyle:<span class="built_in">UIAlertControllerStyleAlert</span>]; </span><br><span class="line">    [alertController addAction:[<span class="built_in">UIAlertAction</span> actionWithTitle:<span class="string">@"确认"</span> style:<span class="built_in">UIAlertActionStyleCancel</span> handler:^(<span class="built_in">UIAlertAction</span> *action) &#123; completionHandler(); &#125;]]; </span><br><span class="line">    <span class="keyword">if</span> (<span class="comment">/*UIViewController of WKWebView is visible*/</span>) </span><br><span class="line">        [<span class="keyword">self</span> presentViewController:alertController animated:<span class="literal">YES</span> completion:^&#123;&#125;]; </span><br><span class="line">    <span class="keyword">else</span> </span><br><span class="line">        completionHandler(); </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>确保上面两种情况下 completionHandler 都能被执行，消除了 WKWebView 下弹 alert 框的 crash，WKWebView 下弹 confirm 框的 crash 的原因与解决方式与 alert 类似。</p>
+<p>另一个 crash 发生在 WKWebView 退出前调用：</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">-[<span class="built_in">WKWebView</span> evaluateJavaScript: completionHandler:]</span><br></pre></td></tr></table></figure>
+
+<p>执行JS代码的情况下。WKWebView 退出并被释放后导致completionHandler变成野指针，而此时 javaScript Core 还在执行JS代码，待 javaScript Core 执行完毕后会调用completionHandler()，导致 crash。这个 crash 只发生在 iOS 8 系统上，参考Apple Open Source，在iOS9及以后系统苹果已经修复了这个bug，主要是对completionHandler block做了copy；对于iOS 8系统，可以通过在 completionHandler 里 retain WKWebView 防止 completionHandler 被过早释放。我们最后用 methodSwizzle hook 了这个系统方法：</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">+ (<span class="keyword">void</span>) load </span><br><span class="line">&#123; </span><br><span class="line">     [<span class="keyword">self</span> jr_swizzleMethod:<span class="built_in">NSSelectorFromString</span>(<span class="string">@"evaluateJavaScript:completionHandler:"</span>) withMethod:<span class="keyword">@selector</span>(altEvaluateJavaScript:completionHandler:) error:<span class="literal">nil</span>]; </span><br><span class="line">&#125; </span><br><span class="line"><span class="comment">/* </span></span><br><span class="line"><span class="comment"> * fix: WKWebView crashes on deallocation if it has pending JavaScript evaluation </span></span><br><span class="line"><span class="comment"> */</span> </span><br><span class="line">- (<span class="keyword">void</span>)altEvaluateJavaScript:(<span class="built_in">NSString</span> *)javaScriptString completionHandler:(<span class="keyword">void</span> (^)(<span class="keyword">id</span>, <span class="built_in">NSError</span> *))completionHandler </span><br><span class="line">&#123; </span><br><span class="line">    <span class="keyword">id</span> strongSelf = <span class="keyword">self</span>; </span><br><span class="line">    [<span class="keyword">self</span> altEvaluateJavaScript:javaScriptString completionHandler:^(<span class="keyword">id</span> r, <span class="built_in">NSError</span> *e) &#123; </span><br><span class="line">        [strongSelf title]; </span><br><span class="line">        <span class="keyword">if</span> (completionHandler) &#123; </span><br><span class="line">            completionHandler(r, e); </span><br><span class="line">        &#125; </span><br><span class="line">    &#125;]; </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="其他问题"><a href="#其他问题" class="headerlink" title="其他问题"></a>其他问题</h3><h4 id="视频自动播放"><a href="#视频自动播放" class="headerlink" title="视频自动播放"></a>视频自动播放</h4><p>WKWebView 需要通过WKWebViewConfiguration.mediaPlaybackRequiresUserAction设置是否允许自动播放，但一定要在 WKWebView 初始化之前设置，在 WKWebView 初始化之后设置无效。</p>
+<h4 id="goBack-API问题"><a href="#goBack-API问题" class="headerlink" title="goBack API问题"></a>goBack API问题</h4><p>WKWebView 上调用 -[WKWebView goBack], 回退到上一个页面后不会触发window.onload()函数、不会执行JS。</p>
+<h4 id="页面滚动速率"><a href="#页面滚动速率" class="headerlink" title="页面滚动速率"></a>页面滚动速率</h4><p>WKWebView 需要通过scrollView delegate调整滚动速率：</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">- (<span class="keyword">void</span>)scrollViewWillBeginDragging:(<span class="built_in">UIScrollView</span> *)scrollView &#123;</span><br><span class="line">     scrollView.decelerationRate = <span class="built_in">UIScrollViewDecelerationRateNormal</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="优化"><a href="#优化" class="headerlink" title="优化"></a>优化</h3><h4 id="初始化优化"><a href="#初始化优化" class="headerlink" title="初始化优化"></a>初始化优化</h4><p>WKWebView初始化耗时长（启动浏览器内核），初始化之后才去加载。</p>
+<p>优化方案：</p>
+<ol>
+<li>全局WebView，打开app，创建一个全局的webView隐藏起来备用<ul>
+<li>额外的内存开销</li>
+<li>页面跳转需要清空上一个页面的痕迹，更容易内存泄露</li>
+</ul>
+</li>
+<li>客户端代理数据请求，初始化webView的同时进行网络请求数据，同步进行</li>
+</ol>
+<h3 id="建立连接-服务器处理"><a href="#建立连接-服务器处理" class="headerlink" title="建立连接/服务器处理"></a>建立连接/服务器处理</h3><p>在页面请求的数据返回之前，主要有以下过程耗费时间。</p>
+<ul>
+<li>DNS</li>
+<li>connection</li>
+<li>服务器处理</li>
+</ul>
+<p>优化方案：</p>
+<ol>
+<li><code>DNS采用和客户端API相同的域名</code><br>DNS会在系统级别进行缓存，对于WebView的地址，如果使用的域名与native的API相同，则可以直接使用缓存的DNS而不用再发起请求图片。</li>
+</ol>
+<p>以美团为例，美团的客户端请求域名主要位于api.meituan.com，然而内嵌的WebView主要位于 i.meituan.com。</p>
+<p>当我们初次打开App时：</p>
+<ul>
+<li>客户端首次打开都会请求api.meituan.com，其DNS将会被系统缓存。</li>
+<li>然而当打开WebView的时候，由于请求了不同的域名，需要重新获取i.meituan.com的IP。</li>
+</ul>
+<p>根据上面的统计，至少10%的用户打开WebView时耗费了60ms在DNS上面，如果WebView的域名与App的API域名统一，则可以让WebView的DNS时间全部达到1.3ms的量级。</p>
+<p>静态资源同理，最好与客户端的资源域名保持一致。</p>
+<ol start="2">
+<li><code>同步渲染采用chunk编码</code><br>同步渲染时如果后端请求时间过长，可以考虑采用chunk编码，将数据放在最后，并优先将静态内容flush。对于传统的后端渲染页面，往往都是使用的【浏览器】–&gt; 【Web API】 –&gt; 【业务 API】的加载模式，其中后端时间就指的是Web API的处理时间了。在这里Web API一般有两个作用：<ol>
+<li>确定静态资源的版本。</li>
+<li>根据用户的请求，去业务API获取数据。</li>
+</ol>
+</li>
+</ol>
+<p>而一般确定静态资源的版本往往是直接读取代码版本，基本无耗时；而主要的后端时间都花费在了业务API请求上面。</p>
+<p>那么怎么优化利用这段时间呢？</p>
+<p>在HTTP协议中，我们可以在header中设置 transfer-encoding:chunked 使得页面可以分块输出。如果合理设计页面，让head部分都是确定的静态资源版本相关内容，而body部分是业务数据相关内容，那么我们可以在用户请求的时候，首先将Web API可以确定的部分先输出给浏览器，然后等API完全获取后，再将API数据传输给浏览器。</p>
+<p>分chunk输出和一起输出的区别：</p>
+<ul>
+<li>如果采用普通方式输出页面，则页面会在服务器请求完所有API并处理完成后开始传输。浏览器要在后端所有API都加载完成后才能开始解析。</li>
+<li>如果采用chunk-encoding: chunked，并优先将页面的静态部分输出；然后处理API请求，并最终返回页面，可以让后端的API请求和前端的资源加载同时进行。</li>
+<li>两者的总共后端时间并没有区别，但是可以提升首字节速度，从而让前端加载资源和后端加载API不互相阻塞。</li>
+</ul>
+<h4 id="页面框架渲染"><a href="#页面框架渲染" class="headerlink" title="页面框架渲染"></a>页面框架渲染</h4><p>页面在解析到足够多的节点，且所有CSS都加载完成后进行首屏渲染。在此之前，页面保持白屏；在页面完全下载并解析完成之前，页面处于不完整展示状态。</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">.....</span><br><span class="line"><span class="tag">&lt;<span class="name">link</span> <span class="attr">href</span>=<span class="string">"//ms0.meituan.net/css/eve.9d9eee71.css"</span> <span class="attr">rel</span>=<span class="string">"stylesheet"</span> <span class="attr">onload</span>=<span class="string">"MT.pageData.eveTime=Date.now()"</span>/&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">script</span>&gt;</span></span><br><span class="line"><span class="javascript"><span class="built_in">window</span>.fk = <span class="function"><span class="keyword">function</span> (<span class="params">callback</span>) </span>&#123;</span></span><br><span class="line"><span class="javascript"><span class="built_in">require</span>([<span class="string">'util/native/risk.js'</span>], <span class="function"><span class="keyword">function</span> (<span class="params">risk</span>) </span>&#123;</span></span><br><span class="line">    risk.getFk(callback);</span><br><span class="line">&#125;);</span><br><span class="line">&#125;</span><br><span class="line"><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">head</span>&gt;</span></span><br><span class="line">....</span><br></pre></td></tr></table></figure>
+
+<p>通常情况下，上面代码的link部分和script部分如果单独出现，都不会阻塞页面的解析：</p>
+<ul>
+<li>CSS不会阻止页面继续向下继续。</li>
+<li>内联的JS很快执行完成，然后继续解析文档。</li>
+</ul>
+<p>然而，当这两部分同时出现的时候，问题就来了。</p>
+<ul>
+<li>CSS加载阻塞了下面的一段内联JS的执行，而被阻塞的内联JS则阻塞了HTML的解析。</li>
+</ul>
+<p>通常情况下，CSS不会阻塞HTML的解析，但如果CSS后面有JS，则会阻塞JS的执行直到CSS加载完成（即便JS是内联的脚本），从而间接阻塞HTML的解析。</p>
+<p>优化：<br>在页面框架加载这一部分，能够优化的点参照雅虎14条就够了；但注意不要犯错，一个小小的内联JS放错位置也会让性能下降很多。</p>
+<ol>
+<li>CSS的加载会在HTML解析到CSS的标签时开始，所以CSS的标签要尽量靠前。</li>
+<li>但是，CSS链接下面不能有任何的JS标签（包括很简单的内联JS），否则会阻塞HTML的解析。</li>
+<li>如果必须要在头部增加内联脚本，一定要放在CSS标签之前。</li>
+</ol>
+<h4 id="JS加载"><a href="#JS加载" class="headerlink" title="JS加载"></a>JS加载</h4><p>经过测试可以得出以下结论：</p>
+<ul>
+<li>偏重的框架，例如React，仅仅初始化的时间就会达到50ms ~ 350ms，这在对性能敏感的业务中时比较不利的。</li>
+<li>在App的启动周期内，统一域名下的代码会被缓存编辑和初始化结果，重复调用性能较好。</li>
+</ul>
+<p>所以，在移动浏览器上，JS的解析和执行时间并不是不可忽略的。</p>
+<p>在低端安卓机上，（框架的初始化+异步数据请求+业务代码执行）会远高于几KB网络请求时间；高性能的Web网站需要仔细斟酌前端渲染带来的性能问题。</p>
+<p>优化：</p>
+<ul>
+<li>高性能要求页面还是需要后端渲染。</li>
+<li>React还是太重了，面向用户写系统需要谨慎考虑。</li>
+<li>JS代码的编译和执行会有缓存，同App中网页尽量统一框架。</li>
+</ul>
+<h4 id="WebView性能优化总结"><a href="#WebView性能优化总结" class="headerlink" title="WebView性能优化总结"></a>WebView性能优化总结</h4><p>一个加载网页的过程中，native、网络、后端处理、CPU都会参与，各自都有必要的工作和依赖关系；让他们相互并行处理而不是相互阻塞才可以让网页加载更快：</p>
+<ul>
+<li>WebView初始化慢，可以在初始化同时先请求数据，让后端和网络不要闲着。</li>
+<li>后端处理慢，可以让服务器分trunk输出，在后端计算的同时前端也加载网络静态资源。</li>
+<li>脚本执行慢，就让脚本在最后运行，不阻塞页面解析。</li>
+<li>同时，合理的预加载、预缓存可以让加载速度的瓶颈更小。</li>
+<li>WebView初始化慢，就随时初始化好一个WebView待用。</li>
+<li>DNS和链接慢，想办法复用客户端使用的域名和链接。</li>
+<li>脚本执行慢，可以把框架代码拆分出来，在请求页面之前就执行好。</li>
+</ul>
+
+        </div>
+
+        <blockquote class="post-copyright">
+    
+    <footer>
+        <a href="https://nixzhang5.github.io">
+            <img src="/img/avatar.jpg" alt="张新平">
+            张新平
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/WebView/">WebView</a></li></ul>
+
+
+            
+<div class="page-share-wrap">
+    
+
+<div class="page-share" id="pageShare">
+    <ul class="reset share-icons">
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://nixzhang5.github.io/WKWebView和UIWebView.html&title=《WKWebView和UIWebView对比》 — Xinping's Blog&pic=https://nixzhang5.github.io/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://nixzhang5.github.io/WKWebView和UIWebView.html&title=《WKWebView和UIWebView对比》 — Xinping's Blog&source=WKWebView和UIWebViewUIWebView自iOS2就有，WKWebView从iOS8才有，毫无疑问WKWebView将逐步取代笨重的UIW..." data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://nixzhang5.github.io/WKWebView和UIWebView.html" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《WKWebView和UIWebView对比》 — Xinping's Blog&url=https://nixzhang5.github.io/WKWebView和UIWebView.html&via=https://nixzhang5.github.io" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://nixzhang5.github.io/WKWebView和UIWebView.html" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+    </ul>
+ </div>
+
+
+
+    <a href="javascript:;" id="shareFab" class="page-share-fab waves-effect waves-circle">
+        <i class="icon icon-share-alt icon-lg"></i>
+    </a>
+</div>
+
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between flex-row-reverse">
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/AFNetWorking原理五.html" id="post-next" class="post-nav-link">
+        <div class="tips">Next <i class="icon icon-angle-right icon-lg icon-pl"></i></div>
+        <h4 class="title">AFNetWorking原理五 AFNetworkReachabilityManager</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        
+
+        <p>
+            
+                <span><a href="/atom.xml" target="_blank" class="rss" title="rss"><i class="icon icon-lg icon-rss"></i></a></span>
+            
+            <span>This blog is licensed under a <a rel="license" href="https://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p><span>张新平 &copy; 2015 - 2019</span>
+            <span>
+                
+                Power by <a href="http://hexo.io/" target="_blank">Hexo</a> Theme <a href="https://github.com/yscoder/hexo-theme-indigo" target="_blank">indigo</a>
+            </span>
+        </p>
+    </div>
+</footer>
+
+    </main>
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+
+<div class="global-share" id="globalShare">
+    <ul class="reset share-icons">
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://nixzhang5.github.io/WKWebView和UIWebView.html&title=《WKWebView和UIWebView对比》 — Xinping's Blog&pic=https://nixzhang5.github.io/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://nixzhang5.github.io/WKWebView和UIWebView.html&title=《WKWebView和UIWebView对比》 — Xinping's Blog&source=WKWebView和UIWebViewUIWebView自iOS2就有，WKWebView从iOS8才有，毫无疑问WKWebView将逐步取代笨重的UIW..." data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://nixzhang5.github.io/WKWebView和UIWebView.html" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《WKWebView和UIWebView对比》 — Xinping's Blog&url=https://nixzhang5.github.io/WKWebView和UIWebView.html&via=https://nixzhang5.github.io" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://nixzhang5.github.io/WKWebView和UIWebView.html" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+    </ul>
+ </div>
+
+
+<div class="page-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMYAAADGCAAAAACs8KCBAAACMElEQVR42u3awY7DIAxFUf7/p1Opq2yA92yoirmsqlEm8WFhYZvW5PV81/v3e/WezLy57VgwYMA4lvEMV+9jvaDHoYzZve+OY4MBA8Y9DDcVKilYJynbN4kZBgwYMIaJVTnSuU/CgAEDRj7hKv+rJ2L96AkDBoybGe6HlePdKsbiWhwGDBgHMmLt+9/83j7fgAEDxt8zHnPFUq1b9NpRwYABozRDGSvqA0h9kLmq3E0FBwMGjEMYmRQZGwzsaOrBgAGjNmNVceteksik6S2VOgwYMI5luKWmi4wlVhgwYNzGSI0D0+PG2GFx0jWEAQNGOUZmMuiGrlynyDwJAwaMqozYWNEtKfXxZzARw4AB4xqGe9FBb7cpbxiDJ3+HAQNGaYbbmdMD3dEHgwEDxp2MTBp1Jw8xknQYhQEDRmmGmzrHYcUYOm9CggEDRlGGHlxmzuBettAHA83dYxgwYBzLcJtc+tHQHWcq7TmpawgDBoxCDD1fuY02/dint+omo1YYMGAUZWResWwXzZI12DWEAQPG4YxYQ80dJ+hbYw81YcCAUZoRGwzoY0XlqoSbgruRwIABoyjjMVdsMKAna7cwhgEDxg2M/PWs/EboY4PYURIGDBg1GPqH9c+sOgIa+w0DBowLGG7/KpYuW2JN3gADBgwYZsGpl6CxZt9kygEDBozrGcpfdJhb1nbfBgMGjAsYmWGAUnDq6ThY3MKAAaM0IzMYMIrM0CUM5UkYMGCUZnwAmGiyUKfNTzoAAAAASUVORK5CYII=" alt="微信分享二维码">
+</div>
+
+
+
+
+    <script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>
+<script>
+var BLOG = { ROOT: '/', SHARE: true, REWARD: false };
+
+
+</script>
+
+<script src="//unpkg.com/hexo-theme-material-indigo@latest/js/main.min.js"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script src="//unpkg.com/hexo-theme-material-indigo@latest/js/search.min.js" async></script>
+
+
+
+
+
+
+
+
+<script>
+(function() {
+    var OriginTitile = document.title, titleTime;
+    document.addEventListener('visibilitychange', function() {
+        if (document.hidden) {
+            document.title = '死鬼去哪里了！';
+            clearTimeout(titleTime);
+        } else {
+            document.title = '欢迎回来！';
+            titleTime = setTimeout(function() {
+                document.title = OriginTitile;
+            },2000);
+        }
+    });
+})();
+</script>
+
+
+
+</body>
+</html>
