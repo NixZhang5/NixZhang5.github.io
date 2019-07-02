@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.9.0">
+    
+
+    
+
+    
+
+
+
+    <meta charset="utf-8">
+    
+    
+    
+    
+    <title>Masonry源码解读 | Xinping&#39;s Blog | 因为有了危机感，所以才会义无反顾。</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    
+    <meta name="theme-color" content="#3F51B5">
+    
+    
+    <meta name="keywords" content="Masonry,链式语法">
+    <meta name="description" content="学习Masonry，首先要学习一下链式语法，从中可以学到一些写法技巧。">
+<meta name="keywords" content="Masonry,链式语法">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Masonry源码解读">
+<meta property="og:url" content="https://nixzhang5.github.io/Masonry源码解读.html">
+<meta property="og:site_name" content="Xinping&#39;s Blog">
+<meta property="og:description" content="学习Masonry，首先要学习一下链式语法，从中可以学到一些写法技巧。">
+<meta property="og:locale" content="en">
+<meta property="og:updated_time" content="2019-07-02T10:42:38.585Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Masonry源码解读">
+<meta name="twitter:description" content="学习Masonry，首先要学习一下链式语法，从中可以学到一些写法技巧。">
+    
+        <link rel="alternate" type="application/atom+xml" title="Xinping&#39;s Blog" href="/atom.xml">
+    
+    <link rel="shortcut icon" href="/img/favicon.ico">
+    <link rel="stylesheet" href="//unpkg.com/hexo-theme-material-indigo@latest/css/style.css">
+    <script>window.lazyScripts=[]</script>
+
+    <!-- custom head -->
+    
+
+</head>
+
+<body>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide" >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap" style="background-image:url(/img/brand.jpg)">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/avatar.jpg">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname">张新平</h5>
+          <a href="mailto:351235445@qq.com" title="351235445@qq.com" class="mail">351235445@qq.com</a>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <i class="icon icon-lg icon-home"></i>
+                主页
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/archives"  >
+                <i class="icon icon-lg icon-archives"></i>
+                Archives
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags"  >
+                <i class="icon icon-lg icon-tags"></i>
+                Tags
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories"  >
+                <i class="icon icon-lg icon-th-list"></i>
+                Categories
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/NixZhang5" target="_blank" >
+                <i class="icon icon-lg icon-github"></i>
+                Github
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">Masonry源码解读</div>
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="Search">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menuShare">
+            <i class="icon icon-lg icon-share-alt"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header">
+
+    <div class="container fade-scale">
+        <h1 class="title">Masonry源码解读</h1>
+        <h5 class="subtitle">
+            
+                <time datetime="2019-07-02T04:28:39.000Z" itemprop="datePublished" class="page-time">
+  2019-07-02
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/iOS/">iOS</a></li></ul>
+
+            
+        </h5>
+    </div>
+
+    
+
+
+</header>
+
+
+<div class="container body-wrap">
+    
+    <aside class="post-widget">
+        <nav class="post-toc-wrap post-toc-shrink" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#链式语法"><span class="post-toc-number">1.</span> <span class="post-toc-text">链式语法</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#抽象基类"><span class="post-toc-number">2.</span> <span class="post-toc-text">抽象基类</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#架构思考"><span class="post-toc-number">3.</span> <span class="post-toc-text">架构思考</span></a></li></ol>
+        </nav>
+    </aside>
+
+
+<article id="post-Masonry源码解读"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">Masonry源码解读</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2019-07-02 12:28:39" datetime="2019-07-02T04:28:39.000Z"  itemprop="datePublished">2019-07-02</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/iOS/">iOS</a></li></ul>
+
+
+
+            
+
+        </div>
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <p>学习Masonry，首先要学习一下链式语法，从中可以学到一些写法技巧。</p>
+<a id="more"></a>
+
+<h3 id="链式语法"><a href="#链式语法" class="headerlink" title="链式语法"></a>链式语法</h3><p>其实就是get方法和block的配合使用。要想实现objc.property语法，就要使用get方法，返回一个property实例。要想实现someOperation(param)这种语法，就需要使用block。两者结合，定义一个block属性并实现它的get方法，就可以实现objc.property(param)这种形式。链式语法，只需要在block内部返回自身即可，objc.property(param).property(param)。</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">@interface</span> <span class="title">UIView</span> (<span class="title">FP</span>)</span></span><br><span class="line"><span class="keyword">@property</span> (<span class="keyword">nonatomic</span>, <span class="keyword">strong</span>, <span class="keyword">readonly</span>) <span class="built_in">UIView</span> *(^fp_frame)(<span class="built_in">CGFloat</span> x, <span class="built_in">CGFloat</span> y, <span class="built_in">CGFloat</span> w, <span class="built_in">CGFloat</span> h);</span><br><span class="line"><span class="keyword">@end</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">@implementation</span> <span class="title">UIView</span> (<span class="title">FP</span>)</span></span><br><span class="line">- (<span class="built_in">UIView</span> *(^)(<span class="built_in">CGFloat</span>, <span class="built_in">CGFloat</span>, <span class="built_in">CGFloat</span>, <span class="built_in">CGFloat</span>))fp_frame &#123;</span><br><span class="line">    <span class="built_in">UIView</span> *(^block)(<span class="built_in">CGFloat</span>, <span class="built_in">CGFloat</span>, <span class="built_in">CGFloat</span>, <span class="built_in">CGFloat</span>) = ^(<span class="built_in">CGFloat</span> x, <span class="built_in">CGFloat</span> y, <span class="built_in">CGFloat</span> w, <span class="built_in">CGFloat</span> h)&#123;</span><br><span class="line">        <span class="keyword">self</span>.frame = <span class="built_in">CGRectMake</span>(x, y, w, h);</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">self</span>;</span><br><span class="line">    &#125;;</span><br><span class="line">    <span class="keyword">return</span> block;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">@end</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">UIView</span> *view = [<span class="built_in">UIView</span> new];</span><br><span class="line">view.fp_frame(<span class="number">100</span>, <span class="number">100</span>, <span class="number">100</span>, <span class="number">100</span>);  <span class="comment">// 设置view的frame</span></span><br></pre></td></tr></table></figure>
+
+<ol>
+<li>什么时候使用链式语法？<br>在面向一些过程化处理的时候（拼接SQL、给View加约束，都可以看成需要一步步完成的过程），需要将这些“过程”拆分，然后在“组合”这些“过程”的时候，就可以使用链式编程，使得代码更加清晰，增加阅读性。</li>
+<li>链式编程的核心实现<br>实现链式编程的关键就是声明一个block的属性，而这个block返回值必须还是一个对象（根据业务需求不同，可以返回的是任何类的实例对象）。而block中内部的逻辑就是项目的业务逻辑。</li>
+</ol>
+<h3 id="抽象基类"><a href="#抽象基类" class="headerlink" title="抽象基类"></a>抽象基类</h3><p>大部分的OOP语言都有明确一种抽象基类的写法。Object-C中没有明确的抽象基类。于是我们可以采用一些类型判断去帮助我们建立一个抽象基类去使用。<br>Masonry中MASConstraint是一个很典型的抽象基类，里面声明了许多有关于NSLayoutConstraint的属性，并且声明了一些基类方法，并且不提供实现。我们<br>进入源码看这一过程。 </p>
+<p>在初始化方法中，通过断言，不提供init方法的实现，也就是说无法获得一个MASConstraint类型的实例。</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">- (<span class="keyword">id</span>)init &#123;</span><br><span class="line">    <span class="comment">// isMemberOfClass 当前类的实例对象判断  isKindOfClass 当前类或者其子类对象判断</span></span><br><span class="line">    <span class="comment">// 初始化判断，该基类不能直接实例化</span></span><br><span class="line">	<span class="built_in">NSAssert</span>(![<span class="keyword">self</span> isMemberOfClass:[MASConstraint <span class="keyword">class</span>]], <span class="string">@"MASConstraint is an abstract class, you should not instantiate it directly."</span>);</span><br><span class="line">	<span class="keyword">return</span> [<span class="keyword">super</span> init];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>一些自身的实例方法，通过一个宏来拒绝本身实例去实现它的方法。</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#define MASMethodNotImplemented() \</span></span><br><span class="line">    <span class="keyword">@throw</span> [<span class="built_in">NSException</span> exceptionWithName:<span class="built_in">NSInternalInconsistencyException</span> \</span><br><span class="line">                                   reason:[<span class="built_in">NSString</span> stringWithFormat:<span class="string">@"You must override %@ in a subclass."</span>, <span class="built_in">NSStringFromSelector</span>(_cmd)] \</span><br><span class="line">                                 userInfo:<span class="literal">nil</span>]</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#pragma mark - Abstract</span></span><br><span class="line">- (MASConstraint *)addConstraintWithLayoutAttribute:(<span class="built_in">NSLayoutAttribute</span> __unused)layoutAttribute &#123;</span><br><span class="line">    MASMethodNotImplemented();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">- (MASConstraint * (^)(<span class="built_in">CGFloat</span> multiplier))multipliedBy &#123; MASMethodNotImplemented(); &#125;</span><br><span class="line"></span><br><span class="line">- (MASConstraint * (^)(<span class="built_in">CGFloat</span> divider))dividedBy &#123; MASMethodNotImplemented(); &#125;</span><br><span class="line"></span><br><span class="line">- (MASConstraint * (^)(MASLayoutPriority priority))priority &#123; MASMethodNotImplemented(); &#125;</span><br><span class="line"></span><br><span class="line">- (MASConstraint * (^)(<span class="keyword">id</span>, <span class="built_in">NSLayoutRelation</span>))equalToWithRelation &#123; MASMethodNotImplemented(); &#125;</span><br><span class="line"></span><br><span class="line">- (MASConstraint * (^)(<span class="keyword">id</span> key))key &#123; MASMethodNotImplemented(); &#125;</span><br><span class="line"></span><br><span class="line">- (<span class="keyword">void</span>)setInsets:(MASEdgeInsets __unused)insets &#123; MASMethodNotImplemented(); &#125;</span><br><span class="line"></span><br><span class="line">- (<span class="keyword">void</span>)setInset:(<span class="built_in">CGFloat</span> __unused)inset &#123; MASMethodNotImplemented(); &#125;</span><br><span class="line"></span><br><span class="line">- (<span class="keyword">void</span>)setSizeOffset:(<span class="built_in">CGSize</span> __unused)sizeOffset &#123; MASMethodNotImplemented(); &#125;</span><br><span class="line"></span><br><span class="line">- (<span class="keyword">void</span>)setCenterOffset:(<span class="built_in">CGPoint</span> __unused)centerOffset &#123; MASMethodNotImplemented(); &#125;</span><br><span class="line"></span><br><span class="line">- (<span class="keyword">void</span>)setOffset:(<span class="built_in">CGFloat</span> __unused)offset &#123; MASMethodNotImplemented(); &#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">#if TARGET_OS_MAC &amp;&amp; !(TARGET_OS_IPHONE || TARGET_OS_TV)</span></span><br><span class="line"></span><br><span class="line">- (MASConstraint *)animator &#123; MASMethodNotImplemented(); &#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">#endif</span></span><br><span class="line"></span><br><span class="line">- (<span class="keyword">void</span>)activate &#123; MASMethodNotImplemented(); &#125;</span><br><span class="line"></span><br><span class="line">- (<span class="keyword">void</span>)deactivate &#123; MASMethodNotImplemented(); &#125;</span><br><span class="line"></span><br><span class="line">- (<span class="keyword">void</span>)install &#123; MASMethodNotImplemented(); &#125;</span><br><span class="line"></span><br><span class="line">- (<span class="keyword">void</span>)uninstall &#123; MASMethodNotImplemented(); &#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="架构思考"><a href="#架构思考" class="headerlink" title="架构思考"></a>架构思考</h3><figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#import <span class="meta-string">"MASUtilities.h"</span>                    -&gt;masonry的一些公共的工具类</span></span><br><span class="line"><span class="meta">#import <span class="meta-string">"View+MASAdditions.h"</span>               -&gt;view的类扩展，常用的方法就是定义在这里</span></span><br><span class="line"><span class="meta">#import <span class="meta-string">"View+MASShorthandAdditions.h"</span>.     -&gt;Shorthand view additions without the 'mas_' prefixes,</span></span><br><span class="line"><span class="meta">#import <span class="meta-string">"ViewController+MASAdditions.h"</span>.  </span></span><br><span class="line"><span class="meta">#import <span class="meta-string">"NSArray+MASAdditions.h"</span>            -&gt;一组views进行约束，没什么特别</span></span><br><span class="line"><span class="meta">#import <span class="meta-string">"NSArray+MASShorthandAdditions.h"</span>   -&gt;同上</span></span><br><span class="line"><span class="meta">#import <span class="meta-string">"MASConstraint.h"</span>                   -&gt;Constraint的抽象基类。其子类有MASViewConstraint和MASCompositeConstraint</span></span><br><span class="line"><span class="meta">#import <span class="meta-string">"MASCompositeConstraint.h"</span>          -&gt;包装多个MASViewConstraint实例。（例如size和center）</span></span><br><span class="line"><span class="meta">#import <span class="meta-string">"MASViewAttribute.h"</span>                -&gt;用来包装一个view的功能类，让一个view和NSLayoutAttribute产生关联</span></span><br><span class="line"><span class="meta">#import <span class="meta-string">"MASViewConstraint.h"</span>               -&gt;包装一些用于设置NSLayoutConstraint的属性</span></span><br><span class="line"><span class="meta">#import <span class="meta-string">"MASConstraintMaker.h"</span>              -&gt;顾名思义，用来制造Constraint</span></span><br><span class="line"><span class="meta">#import <span class="meta-string">"MASLayoutConstraint.h"</span>             -&gt;NSLayoutConstraint的子类，仅仅添加了一个mas_key，作为标志属性</span></span><br><span class="line"><span class="meta">#import <span class="meta-string">"NSLayoutConstraint+MASDebugAdditions.h"</span></span></span><br></pre></td></tr></table></figure>
+
+<p>入口通过一个类扩展</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">- (<span class="built_in">NSArray</span> *)mas_makeConstraints:(<span class="keyword">void</span>(^)(MASConstraintMaker *))block &#123;</span><br><span class="line">    <span class="comment">//将view的translatesAutoresizingMaskIntoConstraint关掉</span></span><br><span class="line">    <span class="keyword">self</span>.translatesAutoresizingMaskIntoConstraints = <span class="literal">NO</span>;</span><br><span class="line">    <span class="comment">//初始化一个maker并将view传进去</span></span><br><span class="line">    MASConstraintMaker *constraintMaker = [[MASConstraintMaker alloc] initWithView:<span class="keyword">self</span>];</span><br><span class="line">    <span class="comment">//通过block去设置constraintMaker。一般一条语句对应一个或者两个MASLayoutConstraint。然后保存在一个可变数组@property (nonatomic, strong) NSMutableArray *constraints;</span></span><br><span class="line">    block(constraintMaker);</span><br><span class="line">    <span class="comment">//取出constraintMaker中的constraints，遍历后根据constraint生成MASLayoutConstraint并添加至每个视图的约束。</span></span><br><span class="line">    <span class="keyword">return</span> [constraintMaker install];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>关键方法有两个，block(constraintMaker)和constraintMaker install。在block中，我们通常会去设置一些layout的属性，然后保存在一个可变数组中，最终通过install方法去完成约束的添加。</p>
+<p>系统的NSLayoutConstraint添加约束：</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line">[superview addConstraints:@[</span><br><span class="line"></span><br><span class="line">    <span class="comment">//view1 constraints</span></span><br><span class="line">    [<span class="built_in">NSLayoutConstraint</span> constraintWithItem:view1</span><br><span class="line">                                 attribute:<span class="built_in">NSLayoutAttributeTop</span></span><br><span class="line">                                 relatedBy:<span class="built_in">NSLayoutRelationEqual</span></span><br><span class="line">                                    toItem:superview</span><br><span class="line">                                 attribute:<span class="built_in">NSLayoutAttributeTop</span></span><br><span class="line">                                multiplier:<span class="number">1.0</span></span><br><span class="line">                                  constant:padding.top],</span><br><span class="line"></span><br><span class="line">    [<span class="built_in">NSLayoutConstraint</span> constraintWithItem:view1</span><br><span class="line">                                 attribute:<span class="built_in">NSLayoutAttributeLeft</span></span><br><span class="line">                                 relatedBy:<span class="built_in">NSLayoutRelationEqual</span></span><br><span class="line">                                    toItem:superview</span><br><span class="line">                                 attribute:<span class="built_in">NSLayoutAttributeLeft</span></span><br><span class="line">                                multiplier:<span class="number">1.0</span></span><br><span class="line">                                  constant:padding.left],</span><br><span class="line"></span><br><span class="line">    [<span class="built_in">NSLayoutConstraint</span> constraintWithItem:view1</span><br><span class="line">                                 attribute:<span class="built_in">NSLayoutAttributeBottom</span></span><br><span class="line">                                 relatedBy:<span class="built_in">NSLayoutRelationEqual</span></span><br><span class="line">                                    toItem:superview</span><br><span class="line">                                 attribute:<span class="built_in">NSLayoutAttributeBottom</span></span><br><span class="line">                                multiplier:<span class="number">1.0</span></span><br><span class="line">                                  constant:-padding.bottom],</span><br><span class="line"></span><br><span class="line">    [<span class="built_in">NSLayoutConstraint</span> constraintWithItem:view1</span><br><span class="line">                                 attribute:<span class="built_in">NSLayoutAttributeRight</span></span><br><span class="line">                                 relatedBy:<span class="built_in">NSLayoutRelationEqual</span></span><br><span class="line">                                    toItem:superview</span><br><span class="line">                                 attribute:<span class="built_in">NSLayoutAttributeRight</span></span><br><span class="line">                                multiplier:<span class="number">1</span></span><br><span class="line">                                  constant:-padding.right],</span><br><span class="line"></span><br><span class="line"> ]];</span><br></pre></td></tr></table></figure>
+
+<p>我们要一直重复去写太多代码，而且attribute的枚举名词过长，导致写起来也十分冗杂，对比一下链式语法的简洁性也就体现出来。而且在使用系统的NSLayoutConstraints还是极容易出现布局错误导致app崩溃。所以masonry也做了很多边界值处理和防止重复layout的机制。 其实masonry的源码要封装的系统的方法不多，可以说看了所有代码就发现关键方法也就封装了这里。</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 核心方法</span></span><br><span class="line">- (<span class="keyword">void</span>)install &#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//如果已经被加载 直接返回</span></span><br><span class="line">    <span class="keyword">if</span> (<span class="keyword">self</span>.hasBeenInstalled) &#123;</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//如果系统layout对象已经创建 直接添加之后 返回</span></span><br><span class="line">    <span class="keyword">if</span> ([<span class="keyword">self</span> supportsActiveProperty] &amp;&amp; <span class="keyword">self</span>.layoutConstraint) &#123;</span><br><span class="line">        <span class="keyword">self</span>.layoutConstraint.active = <span class="literal">YES</span>;</span><br><span class="line">        [<span class="keyword">self</span>.firstViewAttribute.view.mas_installedConstraints addObject:<span class="keyword">self</span>];</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">//获取布局的视图与属性</span></span><br><span class="line">    MAS_VIEW *firstLayoutItem = <span class="keyword">self</span>.firstViewAttribute.item;</span><br><span class="line">    <span class="built_in">NSLayoutAttribute</span> firstLayoutAttribute = <span class="keyword">self</span>.firstViewAttribute.layoutAttribute;</span><br><span class="line">    MAS_VIEW *secondLayoutItem = <span class="keyword">self</span>.secondViewAttribute.item;</span><br><span class="line">    <span class="built_in">NSLayoutAttribute</span> secondLayoutAttribute = <span class="keyword">self</span>.secondViewAttribute.layoutAttribute;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//如果不是尺寸布局并且 相对视图不存在 默认对父视图进行相对布局</span></span><br><span class="line">    <span class="keyword">if</span> (!<span class="keyword">self</span>.firstViewAttribute.isSizeAttribute &amp;&amp; !<span class="keyword">self</span>.secondViewAttribute) &#123;</span><br><span class="line">        secondLayoutItem = <span class="keyword">self</span>.firstViewAttribute.view.superview;</span><br><span class="line">        secondLayoutAttribute = firstLayoutAttribute;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">//使用系统NSLayoutConstraint的方法（相当于二次封装），创建布局对象</span></span><br><span class="line">    <span class="comment">//通过一个for循环，每有一个NSLayoutConstraint就install一次。</span></span><br><span class="line">    MASLayoutConstraint *layoutConstraint</span><br><span class="line">        = [MASLayoutConstraint constraintWithItem:firstLayoutItem</span><br><span class="line">                                        attribute:firstLayoutAttribute</span><br><span class="line">                                        relatedBy:<span class="keyword">self</span>.layoutRelation</span><br><span class="line">                                           toItem:secondLayoutItem</span><br><span class="line">                                        attribute:secondLayoutAttribute</span><br><span class="line">                                       multiplier:<span class="keyword">self</span>.layoutMultiplier</span><br><span class="line">                                         constant:<span class="keyword">self</span>.layoutConstant];</span><br><span class="line">    </span><br><span class="line">    <span class="comment">//设置key和优先级</span></span><br><span class="line">    layoutConstraint.priority = <span class="keyword">self</span>.layoutPriority;</span><br><span class="line">    layoutConstraint.mas_key = <span class="keyword">self</span>.mas_key;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">//设置约束对象对用于的视图</span></span><br><span class="line">    <span class="keyword">if</span> (<span class="keyword">self</span>.secondViewAttribute.view) &#123;</span><br><span class="line">        <span class="comment">//获取共同的父视图</span></span><br><span class="line">        MAS_VIEW *closestCommonSuperview = [<span class="keyword">self</span>.firstViewAttribute.view mas_closestCommonSuperview:<span class="keyword">self</span>.secondViewAttribute.view];</span><br><span class="line">        <span class="built_in">NSAssert</span>(closestCommonSuperview,</span><br><span class="line">                 <span class="string">@"couldn't find a common superview for %@ and %@"</span>,</span><br><span class="line">                 <span class="keyword">self</span>.firstViewAttribute.view, <span class="keyword">self</span>.secondViewAttribute.view);</span><br><span class="line">        <span class="keyword">self</span>.installedView = closestCommonSuperview;</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (<span class="keyword">self</span>.firstViewAttribute.isSizeAttribute) &#123;</span><br><span class="line">        <span class="keyword">self</span>.installedView = <span class="keyword">self</span>.firstViewAttribute.view;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="keyword">self</span>.installedView = <span class="keyword">self</span>.firstViewAttribute.view.superview;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    MASLayoutConstraint *existingConstraint = <span class="literal">nil</span>;</span><br><span class="line">    <span class="comment">//更新约束的操作</span></span><br><span class="line">    <span class="keyword">if</span> (<span class="keyword">self</span>.updateExisting) &#123;</span><br><span class="line">        existingConstraint = [<span class="keyword">self</span> layoutConstraintSimilarTo:layoutConstraint];</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (existingConstraint) &#123;</span><br><span class="line">        <span class="comment">// just update the constant</span></span><br><span class="line">        existingConstraint.constant = layoutConstraint.constant;</span><br><span class="line">        <span class="keyword">self</span>.layoutConstraint = existingConstraint;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="comment">//最终添加约束</span></span><br><span class="line">        [<span class="keyword">self</span>.installedView addConstraint:layoutConstraint];</span><br><span class="line">        <span class="keyword">self</span>.layoutConstraint = layoutConstraint;</span><br><span class="line">        [firstLayoutItem.mas_installedConstraints addObject:<span class="keyword">self</span>];</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>其他代码都是为了这个方法服务的。这也就看出oc代码的一个灵活性。masonry的源码不难看懂，而且代码量比较少，所以还是比较容易了解它的核心。<br>关键还是要想得懂那些block方法的回调。用block作为返回值，其实就是把一个函数作为返回值，这种做法在js中比较常见，而且js中写法也更加简洁易懂。</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#import <span class="meta-string">"View+MASAdditions.m"</span></span></span><br><span class="line">- (<span class="built_in">NSArray</span> *)mas_makeConstraints:(<span class="keyword">void</span>(^)(MASConstraintMaker *))block &#123;</span><br><span class="line">    <span class="keyword">self</span>.translatesAutoresizingMaskIntoConstraints = <span class="literal">NO</span>;</span><br><span class="line">    MASConstraintMaker *constraintMaker = [[MASConstraintMaker alloc] initWithView:<span class="keyword">self</span>];</span><br><span class="line">    block(constraintMaker);</span><br><span class="line">    <span class="keyword">return</span> [constraintMaker install];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">#import <span class="meta-string">"MASConstraintMaker.m"</span></span></span><br><span class="line">- (<span class="built_in">NSArray</span> *)install &#123;</span><br><span class="line">    <span class="keyword">if</span> (<span class="keyword">self</span>.removeExisting) &#123;</span><br><span class="line">        <span class="built_in">NSArray</span> *installedConstraints = [MASViewConstraint installedConstraintsForView:<span class="keyword">self</span>.view];</span><br><span class="line">        <span class="keyword">for</span> (MASConstraint *constraint <span class="keyword">in</span> installedConstraints) &#123;</span><br><span class="line">            [constraint uninstall];</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">NSArray</span> *constraints = <span class="keyword">self</span>.constraints.copy;</span><br><span class="line">    <span class="keyword">for</span> (MASConstraint *constraint <span class="keyword">in</span> constraints) &#123;</span><br><span class="line">        constraint.updateExisting = <span class="keyword">self</span>.updateExisting;</span><br><span class="line">        [constraint install];</span><br><span class="line">    &#125;</span><br><span class="line">    [<span class="keyword">self</span>.constraints removeAllObjects];</span><br><span class="line">    <span class="keyword">return</span> constraints;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>MASConstraintMaker接受MASConstraint的代理方法，constraints数组添加newConstraint对象，最后通过install方法，循环遍历添加约束。</p>
+
+        </div>
+
+        <blockquote class="post-copyright">
+    
+    <footer>
+        <a href="https://nixzhang5.github.io">
+            <img src="/img/avatar.jpg" alt="张新平">
+            张新平
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Masonry/">Masonry</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/链式语法/">链式语法</a></li></ul>
+
+
+            
+<div class="page-share-wrap">
+    
+
+<div class="page-share" id="pageShare">
+    <ul class="reset share-icons">
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://nixzhang5.github.io/Masonry源码解读.html&title=《Masonry源码解读》 — Xinping's Blog&pic=https://nixzhang5.github.io/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://nixzhang5.github.io/Masonry源码解读.html&title=《Masonry源码解读》 — Xinping's Blog&source=学习Masonry，首先要学习一下链式语法，从中可以学到一些写法技巧。" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://nixzhang5.github.io/Masonry源码解读.html" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《Masonry源码解读》 — Xinping's Blog&url=https://nixzhang5.github.io/Masonry源码解读.html&via=https://nixzhang5.github.io" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://nixzhang5.github.io/Masonry源码解读.html" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+    </ul>
+ </div>
+
+
+
+    <a href="javascript:;" id="shareFab" class="page-share-fab waves-effect waves-circle">
+        <i class="icon icon-share-alt icon-lg"></i>
+    </a>
+</div>
+
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between flex-row-reverse">
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/WKWebView和UIWebView.html" id="post-next" class="post-nav-link">
+        <div class="tips">Next <i class="icon icon-angle-right icon-lg icon-pl"></i></div>
+        <h4 class="title">WKWebView和UIWebView对比</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        
+
+        <p>
+            
+                <span><a href="/atom.xml" target="_blank" class="rss" title="rss"><i class="icon icon-lg icon-rss"></i></a></span>
+            
+            <span>This blog is licensed under a <a rel="license" href="https://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p><span>张新平 &copy; 2015 - 2019</span>
+            <span>
+                
+                Power by <a href="http://hexo.io/" target="_blank">Hexo</a> Theme <a href="https://github.com/yscoder/hexo-theme-indigo" target="_blank">indigo</a>
+            </span>
+        </p>
+    </div>
+</footer>
+
+    </main>
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+
+<div class="global-share" id="globalShare">
+    <ul class="reset share-icons">
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://nixzhang5.github.io/Masonry源码解读.html&title=《Masonry源码解读》 — Xinping's Blog&pic=https://nixzhang5.github.io/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://nixzhang5.github.io/Masonry源码解读.html&title=《Masonry源码解读》 — Xinping's Blog&source=学习Masonry，首先要学习一下链式语法，从中可以学到一些写法技巧。" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://nixzhang5.github.io/Masonry源码解读.html" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《Masonry源码解读》 — Xinping's Blog&url=https://nixzhang5.github.io/Masonry源码解读.html&via=https://nixzhang5.github.io" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://nixzhang5.github.io/Masonry源码解读.html" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+    </ul>
+ </div>
+
+
+<div class="page-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMYAAADGCAAAAACs8KCBAAACJUlEQVR42u3ay26EMAwF0Pn/n6bbSi302oZKJCerEcMQziwsP/L5xOv4tn5eObs+eebniYWBgfFaxnG5nnjp6ydc73u6IwYGxgaMs42vP1//Knlmwoh2wcDAwPhxz11BM3kyBgYGxr2M5FcJGAMDA6NXxFZbb5PQ/GAtjoGB8UJG3nX//8+PzDcwMDBexTiKq5c+Vl+x/FYYGBhLM+aPvrcM7r0PBgbG2oxquZgXn3/8c0HJmo9FMTAw1mZc31odQ1ZHkvO0MppyYGBgvJyRp3RJO7532KIaP3+5joGBsTSjl5BdJ455CO4lgqffYmBgbMDoNcKaHb5Wk65QkWNgYCzEqB7tSsJrr3k3CfEYGBg7MJJUrAeoJoJ5yXp6ZgQDA2NpRmFM2MrNcmoefKOaGAMDYwlGb0gwuXN+2AIDA2NPxrxlX2265cll+bAFBgbGBow8caxeryaX5R9jYGAsyqg28fN7qrvk5S4GBsY+jDyBS5K2PMkrNP3jtBUDA2NtRq8d3yto7xpFjHqHGBgYSzB6xyPyw2RJEVv+IzAwMDZg5AlcdcukbJ6MFjAwMNZmHMU1afRXhwp5Ow8DA2NtRq/4zK/Mx6JJ6omBgbEDozfCrBaxedhtBnoMDIwNGL3AlxxLnbfYyl1DDAwMjHFZWy1lHwy4GBgYGzCqhzN6R76iJiAGBsYGjKSInY85Jy+KgYGxM2OSdyUtszxkzxt8GBgYyzG+ALEULLrbxB9EAAAAAElFTkSuQmCC" alt="微信分享二维码">
+</div>
+
+
+
+
+    <script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>
+<script>
+var BLOG = { ROOT: '/', SHARE: true, REWARD: false };
+
+
+</script>
+
+<script src="//unpkg.com/hexo-theme-material-indigo@latest/js/main.min.js"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script src="//unpkg.com/hexo-theme-material-indigo@latest/js/search.min.js" async></script>
+
+
+
+
+
+
+
+
+<script>
+(function() {
+    var OriginTitile = document.title, titleTime;
+    document.addEventListener('visibilitychange', function() {
+        if (document.hidden) {
+            document.title = '死鬼去哪里了！';
+            clearTimeout(titleTime);
+        } else {
+            document.title = '欢迎回来！';
+            titleTime = setTimeout(function() {
+                document.title = OriginTitile;
+            },2000);
+        }
+    });
+})();
+</script>
+
+
+
+</body>
+</html>
