@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://nixzhang5.github.io/"/>
-  <updated>2019-07-04T02:40:53.853Z</updated>
+  <updated>2019-07-25T07:43:02.876Z</updated>
   <id>https://nixzhang5.github.io/</id>
   
   <author>
@@ -15,6 +15,28 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>three.js学习 开篇</title>
+    <link href="https://nixzhang5.github.io/three-js%E5%AD%A6%E4%B9%A0.html"/>
+    <id>https://nixzhang5.github.io/three-js学习.html</id>
+    <published>2019-07-25T07:10:34.000Z</published>
+    <updated>2019-07-25T07:43:02.876Z</updated>
+    
+    <content type="html"><![CDATA[<p>Three.js是使用面向对象的方式来构建程序，包含3个基本对象： 场景（scene）, 相机（camera）, 以及一个渲染器（renderer）。scene就像是拍摄布景空间，相机相当于摄像头，renderer把拍摄好的场景转换成胶卷。</p><a id="more"></a><h3 id="创建一个场景"><a href="#创建一个场景" class="headerlink" title="创建一个场景"></a>创建一个场景</h3><p>新建文件夹，在文件夹下面新建three.html文件，拷贝下面代码到html文件中；新建js文件夹，在js文件夹下新建three.js文件，将<a href="https://threejs.org/build/three.js" target="_blank" rel="noopener">three.js</a>复制到该HTML文件所在的目录下的js/three.js下，然后在你的浏览器中打开这个three.html文件。</p><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;!DOCTYPE html&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">html</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">head</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">meta</span> <span class="attr">charset</span>=<span class="string">utf-8</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">title</span>&gt;</span>My first three.js app<span class="tag">&lt;/<span class="name">title</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">style</span>&gt;</span></span><br><span class="line">body &#123; margin: 0; &#125;</span><br><span class="line">canvas &#123; width: 100%; height: 100% &#125;</span><br><span class="line"><span class="tag">&lt;/<span class="name">style</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">head</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">script</span> <span class="attr">src</span>=<span class="string">"js/three.js"</span>&gt;</span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">script</span>&gt;</span></span><br><span class="line">// Our Javascript will go here.</span><br><span class="line"><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br></pre></td></tr></table></figure><p>编写代码在空的script标签里面</p><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> scene = <span class="keyword">new</span> THREE.Scene();</span><br><span class="line"><span class="keyword">var</span> camera = <span class="keyword">new</span> THREE.PerspectiveCamera(<span class="number">75</span>, <span class="built_in">window</span>.innerWidth / <span class="built_in">window</span>.innerHeight, <span class="number">0.1</span>, <span class="number">1000</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> renderer = <span class="keyword">new</span> THREE.WebGLRenderer();</span><br><span class="line">renderer.setSize(<span class="built_in">window</span>.innerWidth, <span class="built_in">window</span>.innerHeight);</span><br><span class="line"><span class="built_in">document</span>.body.appendChild( renderer.domElement );</span><br></pre></td></tr></table></figure><p>这段代码构建了scene, camera 和 renderer。Three.js的架构支持多种camera，这里使用最常见的远景相机（PerspectiveCamera），也就是类似于人眼观察的方式。</p><ol><li><p>THREE.Scene()初始化布景空间。</p></li><li><p>THREE.PerspectiveCamera()用来初始化远景相机，这里面有4个参数</p><ol><li>视野角度（FOV）：显示器边缘与观察点（眼睛）连线的夹角。</li><li>相机拍摄面的长宽比（aspect ratio）</li><li>近剪切面 </li><li>远剪切面</li></ol><p>两个剪切面之间形成的柱体空间内的物体才会显示，下面有一张图来说明这四个属性</p></li><li><p>WebGLRenderer是渲染器中的一种，初始化之后需要设置渲染器的尺寸，通过setSize来设置，最后把渲染器加载到HTML文档中。</p></li></ol><figure class="image-bubble">                <div class="img-lightbox">                    <div class="overlay"></div>                    <img src="/three.js学习/fov.gif" alt="FOV.gif" title>                </div>                <div class="image-caption">FOV.gif</div>            </figure><figure class="image-bubble">                <div class="img-lightbox">                    <div class="overlay"></div>                    <img src="/three.js学习/scene.png" alt="scene" title>                </div>                <div class="image-caption">scene</div>            </figure>]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;Three.js是使用面向对象的方式来构建程序，包含3个基本对象： 场景（scene）, 相机（camera）, 以及一个渲染器（renderer）。scene就像是拍摄布景空间，相机相当于摄像头，renderer把拍摄好的场景转换成胶卷。&lt;/p&gt;
+    
+    </summary>
+    
+      <category term="Web" scheme="https://nixzhang5.github.io/categories/Web/"/>
+    
+    
+      <category term="3D" scheme="https://nixzhang5.github.io/tags/3D/"/>
+    
+  </entry>
   
   <entry>
     <title>离屏渲染</title>

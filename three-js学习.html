@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.9.0">
+    
+
+    
+
+    
+
+
+
+    <meta charset="utf-8">
+    
+    
+    
+    
+    <title>three.js学习 开篇 | Xinping&#39;s Blog | 因为有了危机感，所以才会义无反顾。</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    
+    <meta name="theme-color" content="#3F51B5">
+    
+    
+    <meta name="keywords" content="3D">
+    <meta name="description" content="Three.js是使用面向对象的方式来构建程序，包含3个基本对象： 场景（scene）, 相机（camera）, 以及一个渲染器（renderer）。scene就像是拍摄布景空间，相机相当于摄像头，renderer把拍摄好的场景转换成胶卷。">
+<meta name="keywords" content="3D">
+<meta property="og:type" content="article">
+<meta property="og:title" content="three.js学习 开篇">
+<meta property="og:url" content="https://nixzhang5.github.io/three-js学习.html">
+<meta property="og:site_name" content="Xinping&#39;s Blog">
+<meta property="og:description" content="Three.js是使用面向对象的方式来构建程序，包含3个基本对象： 场景（scene）, 相机（camera）, 以及一个渲染器（renderer）。scene就像是拍摄布景空间，相机相当于摄像头，renderer把拍摄好的场景转换成胶卷。">
+<meta property="og:locale" content="en">
+<meta property="og:image" content="https://nixzhang5.github.io/three.js学习/fov.gif">
+<meta property="og:image" content="https://nixzhang5.github.io/three.js学习/scene.png">
+<meta property="og:updated_time" content="2019-07-25T07:43:02.876Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="three.js学习 开篇">
+<meta name="twitter:description" content="Three.js是使用面向对象的方式来构建程序，包含3个基本对象： 场景（scene）, 相机（camera）, 以及一个渲染器（renderer）。scene就像是拍摄布景空间，相机相当于摄像头，renderer把拍摄好的场景转换成胶卷。">
+<meta name="twitter:image" content="https://nixzhang5.github.io/three.js学习/fov.gif">
+    
+        <link rel="alternate" type="application/atom+xml" title="Xinping&#39;s Blog" href="/atom.xml">
+    
+    <link rel="shortcut icon" href="/img/favicon.ico">
+    <link rel="stylesheet" href="//unpkg.com/hexo-theme-material-indigo@latest/css/style.css">
+    <script>window.lazyScripts=[]</script>
+
+    <!-- custom head -->
+    
+
+</head>
+
+<body>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide" >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap" style="background-image:url(/img/brand.jpg)">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/avatar.jpg">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname">张新平</h5>
+          <a href="mailto:351235445@qq.com" title="351235445@qq.com" class="mail">351235445@qq.com</a>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <i class="icon icon-lg icon-home"></i>
+                主页
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/archives"  >
+                <i class="icon icon-lg icon-archives"></i>
+                Archives
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags"  >
+                <i class="icon icon-lg icon-tags"></i>
+                Tags
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories"  >
+                <i class="icon icon-lg icon-th-list"></i>
+                Categories
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/NixZhang5" target="_blank" >
+                <i class="icon icon-lg icon-github"></i>
+                Github
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">three.js学习 开篇</div>
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="Search">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menuShare">
+            <i class="icon icon-lg icon-share-alt"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header">
+
+    <div class="container fade-scale">
+        <h1 class="title">three.js学习 开篇</h1>
+        <h5 class="subtitle">
+            
+                <time datetime="2019-07-25T07:10:34.000Z" itemprop="datePublished" class="page-time">
+  2019-07-25
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Web/">Web</a></li></ul>
+
+            
+        </h5>
+    </div>
+
+    
+
+
+</header>
+
+
+<div class="container body-wrap">
+    
+    <aside class="post-widget">
+        <nav class="post-toc-wrap post-toc-shrink" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#创建一个场景"><span class="post-toc-number">1.</span> <span class="post-toc-text">创建一个场景</span></a></li></ol>
+        </nav>
+    </aside>
+
+
+<article id="post-three-js学习"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">three.js学习 开篇</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2019-07-25 15:10:34" datetime="2019-07-25T07:10:34.000Z"  itemprop="datePublished">2019-07-25</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/Web/">Web</a></li></ul>
+
+
+
+            
+
+        </div>
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <p>Three.js是使用面向对象的方式来构建程序，包含3个基本对象： 场景（scene）, 相机（camera）, 以及一个渲染器（renderer）。scene就像是拍摄布景空间，相机相当于摄像头，renderer把拍摄好的场景转换成胶卷。</p>
+<a id="more"></a>
+
+<h3 id="创建一个场景"><a href="#创建一个场景" class="headerlink" title="创建一个场景"></a>创建一个场景</h3><p>新建文件夹，在文件夹下面新建three.html文件，拷贝下面代码到html文件中；新建js文件夹，在js文件夹下新建three.js文件，将<a href="https://threejs.org/build/three.js" target="_blank" rel="noopener">three.js</a>复制到该HTML文件所在的目录下的js/three.js下，然后在你的浏览器中打开这个three.html文件。</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;!DOCTYPE html&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">html</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">head</span>&gt;</span></span><br><span class="line">		<span class="tag">&lt;<span class="name">meta</span> <span class="attr">charset</span>=<span class="string">utf-8</span>&gt;</span></span><br><span class="line">		<span class="tag">&lt;<span class="name">title</span>&gt;</span>My first three.js app<span class="tag">&lt;/<span class="name">title</span>&gt;</span></span><br><span class="line">		<span class="tag">&lt;<span class="name">style</span>&gt;</span></span><br><span class="line">			body &#123; margin: 0; &#125;</span><br><span class="line">			canvas &#123; width: 100%; height: 100% &#125;</span><br><span class="line">		<span class="tag">&lt;/<span class="name">style</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;/<span class="name">head</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">body</span>&gt;</span></span><br><span class="line">		<span class="tag">&lt;<span class="name">script</span> <span class="attr">src</span>=<span class="string">"js/three.js"</span>&gt;</span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line">		<span class="tag">&lt;<span class="name">script</span>&gt;</span></span><br><span class="line">			// Our Javascript will go here.</span><br><span class="line">		<span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>编写代码在空的script标签里面</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> scene = <span class="keyword">new</span> THREE.Scene();</span><br><span class="line"><span class="keyword">var</span> camera = <span class="keyword">new</span> THREE.PerspectiveCamera(<span class="number">75</span>, <span class="built_in">window</span>.innerWidth / <span class="built_in">window</span>.innerHeight, <span class="number">0.1</span>, <span class="number">1000</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> renderer = <span class="keyword">new</span> THREE.WebGLRenderer();</span><br><span class="line">renderer.setSize(<span class="built_in">window</span>.innerWidth, <span class="built_in">window</span>.innerHeight);</span><br><span class="line"><span class="built_in">document</span>.body.appendChild( renderer.domElement );</span><br></pre></td></tr></table></figure>
+
+<p>这段代码构建了scene, camera 和 renderer。Three.js的架构支持多种camera，这里使用最常见的远景相机（PerspectiveCamera），也就是类似于人眼观察的方式。</p>
+<ol>
+<li><p>THREE.Scene()初始化布景空间。</p>
+</li>
+<li><p>THREE.PerspectiveCamera()用来初始化远景相机，这里面有4个参数</p>
+<ol>
+<li>视野角度（FOV）：显示器边缘与观察点（眼睛）连线的夹角。</li>
+<li>相机拍摄面的长宽比（aspect ratio）</li>
+<li>近剪切面 </li>
+<li>远剪切面</li>
+</ol>
+<p>两个剪切面之间形成的柱体空间内的物体才会显示，下面有一张图来说明这四个属性</p>
+</li>
+<li><p>WebGLRenderer是渲染器中的一种，初始化之后需要设置渲染器的尺寸，通过setSize来设置，最后把渲染器加载到HTML文档中。</p>
+</li>
+</ol>
+<figure class="image-bubble">
+                <div class="img-lightbox">
+                    <div class="overlay"></div>
+                    <img src="/three.js学习/fov.gif" alt="FOV.gif" title>
+                </div>
+                <div class="image-caption">FOV.gif</div>
+            </figure>
+
+<figure class="image-bubble">
+                <div class="img-lightbox">
+                    <div class="overlay"></div>
+                    <img src="/three.js学习/scene.png" alt="scene" title>
+                </div>
+                <div class="image-caption">scene</div>
+            </figure>
+
+        </div>
+
+        <blockquote class="post-copyright">
+    
+    <footer>
+        <a href="https://nixzhang5.github.io">
+            <img src="/img/avatar.jpg" alt="张新平">
+            张新平
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/3D/">3D</a></li></ul>
+
+
+            
+<div class="page-share-wrap">
+    
+
+<div class="page-share" id="pageShare">
+    <ul class="reset share-icons">
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://nixzhang5.github.io/three-js学习.html&title=《three.js学习 开篇》 — Xinping's Blog&pic=https://nixzhang5.github.io/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://nixzhang5.github.io/three-js学习.html&title=《three.js学习 开篇》 — Xinping's Blog&source=Three.js是使用面向对象的方式来构建程序，包含3个基本对象： 场景（scene）, 相机（camera）, 以及一个渲染器（renderer）。sc..." data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://nixzhang5.github.io/three-js学习.html" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《three.js学习 开篇》 — Xinping's Blog&url=https://nixzhang5.github.io/three-js学习.html&via=https://nixzhang5.github.io" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://nixzhang5.github.io/three-js学习.html" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+    </ul>
+ </div>
+
+
+
+    <a href="javascript:;" id="shareFab" class="page-share-fab waves-effect waves-circle">
+        <i class="icon icon-share-alt icon-lg"></i>
+    </a>
+</div>
+
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between flex-row-reverse">
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/离屏渲染.html" id="post-next" class="post-nav-link">
+        <div class="tips">Next <i class="icon icon-angle-right icon-lg icon-pl"></i></div>
+        <h4 class="title">离屏渲染</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        
+
+        <p>
+            
+                <span><a href="/atom.xml" target="_blank" class="rss" title="rss"><i class="icon icon-lg icon-rss"></i></a></span>
+            
+            <span>This blog is licensed under a <a rel="license" href="https://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p><span>张新平 &copy; 2015 - 2019</span>
+            <span>
+                
+                Power by <a href="http://hexo.io/" target="_blank">Hexo</a> Theme <a href="https://github.com/yscoder/hexo-theme-indigo" target="_blank">indigo</a>
+            </span>
+        </p>
+    </div>
+</footer>
+
+    </main>
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+
+<div class="global-share" id="globalShare">
+    <ul class="reset share-icons">
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=https://nixzhang5.github.io/three-js学习.html&title=《three.js学习 开篇》 — Xinping's Blog&pic=https://nixzhang5.github.io/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=https://nixzhang5.github.io/three-js学习.html&title=《three.js学习 开篇》 — Xinping's Blog&source=Three.js是使用面向对象的方式来构建程序，包含3个基本对象： 场景（scene）, 相机（camera）, 以及一个渲染器（renderer）。sc..." data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https://nixzhang5.github.io/three-js学习.html" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《three.js学习 开篇》 — Xinping's Blog&url=https://nixzhang5.github.io/three-js学习.html&via=https://nixzhang5.github.io" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=https://nixzhang5.github.io/three-js学习.html" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+    </ul>
+ </div>
+
+
+<div class="page-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMYAAADGCAAAAACs8KCBAAACK0lEQVR42u3aS47CMBBF0ex/02GKFGLdVwVIKV+PWg1xfBhY9TsOvM63tf70+s27p66frt/yhSVDhozHMs7luvsOB5CD3rHJ2WTIkLEPg1yFne+sAWvG+r0yZMiQQbauXbgpSYYMGTJSRppw8qBQhgwZMjpJ7LcSTn70n+TiMmTIeCCDX5f///sn/Q0ZMmQ8inGGizcg02PxS/bDW2TIkDGakb6GFMjWJbk0eQ7OI0OGjA0YvEyfDk+QdkJ/NxkyZMxm8CZlJ1fmIWZahpMhQ8ZsRv9a5Jcm+TT9yWTIkLEPozjcUBrOSPdEb5EhQ8ZoBr9q+UBGOsDKL2uElyFDxlBGrRDPx7PSUbNi6itDhozRjHXglQ6hpuOnvMwXJMMyZMgYxOBBW79YxvfnoerReY0MGTIexeAP1BoA/O4vDlvIkCFjA0baPiQhYG3P4n9kyJAxmlFrGdZS0/61W+sFyJAhYwaDtx47zU6yM/mNb5+VIUPGaAZvPaYNyDRwrLVCZciQsQMjDc46h+bXbvpTypAhYwdG+nAn+Ks1PoNsW4YMGUMZtdGHdE8+eBFXCmXIkDGUcYaL4zvdiThtliFDxmgGX2na2blk04aEDBkydmD0hydQOSwMSeOSnwwZMjZgdEpgaQEubTYgpAwZMmRgBm858FASJbEyZMiQgctn/Fg8HCRhqAwZMnZg1AYsauNfPHENUlwZMmSMZtRGHNIRjbRR2i/nyZAhYwTjBUO6A/GizsdBAAAAAElFTkSuQmCC" alt="微信分享二维码">
+</div>
+
+
+
+
+    <script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>
+<script>
+var BLOG = { ROOT: '/', SHARE: true, REWARD: false };
+
+
+</script>
+
+<script src="//unpkg.com/hexo-theme-material-indigo@latest/js/main.min.js"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script src="//unpkg.com/hexo-theme-material-indigo@latest/js/search.min.js" async></script>
+
+
+
+
+
+
+
+
+<script>
+(function() {
+    var OriginTitile = document.title, titleTime;
+    document.addEventListener('visibilitychange', function() {
+        if (document.hidden) {
+            document.title = '死鬼去哪里了！';
+            clearTimeout(titleTime);
+        } else {
+            document.title = '欢迎回来！';
+            titleTime = setTimeout(function() {
+                document.title = OriginTitile;
+            },2000);
+        }
+    });
+})();
+</script>
+
+
+
+</body>
+</html>
